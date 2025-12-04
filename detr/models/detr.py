@@ -61,13 +61,21 @@ class DETR(nn.Module):
         features, pos = self.backbone(samples)
 
         src, mask = features[-1].decompose()
+
+        bs, c, h_feat, w_feat = src.shape ## changes here ##特徴マップの形状を取得 (Batch, Channel, Height, Width)
+
         assert mask is not None
         hs, attn_weights, _ = self.transformer(self.input_proj(src), mask, self.query_embed.weight, pos[-1]) 
 
         outputs_class = self.class_embed(hs)
         outputs_coord = self.bbox_embed(hs).sigmoid()
         out = {'pred_logits': outputs_class[-1], 'pred_boxes': outputs_coord[-1]}
-        out['decoder_attention'] = attn_weights ## changes here ## return all layer
+
+        # [Batch, Queries, Flatten] -> [Batch, Queries, Height, Width]
+        # print("Attention Weights Shape:", attn_weights.shape)  # デバッグ用
+        # print("Feature Map Size: Height =", h_feat, ", Width =", w_feat)  # デバッグ用
+        out['decoder_attention'] = attn_weights.view(attn_weights.shape[0], bs, self.num_queries, h_feat, w_feat) ## changes here ## return all layer
+
         if self.aux_loss:
             out['aux_outputs'] = self._set_aux_loss(outputs_class, outputs_coord)
         return out
