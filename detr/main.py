@@ -99,6 +99,15 @@ def get_args_parser():
     parser.add_argument('--world_size', default=1, type=int,
                         help='number of distributed processes')
     parser.add_argument('--dist_url', default='env://', help='url used to set up distributed training')
+
+    ## changes here
+    parser.add_argument('--lr_depth_encoder', default=1e-4, type=float,
+                        help="Learning rate for depth encoder")
+    parser.add_argument('--depth_path', type=str, default=None,
+                        help='path to depth images folder')
+    parser.add_argument('--use_depth', action='store_true',
+                        help='use depth images for training')
+
     return parser
 
 
@@ -129,10 +138,24 @@ def main(args):
     print('number of params:', n_parameters)
 
     param_dicts = [
-        {"params": [p for n, p in model_without_ddp.named_parameters() if "backbone" not in n and p.requires_grad]},
+        {"params": [p for n, p in model_without_ddp.named_parameters() if "backbone" not in n 
+                    ## changes here
+                    and "encoder_depth" not in n and "fusion_mlp" not in n and p.requires_grad ],
+                    "lr": args.lr},
         {
             "params": [p for n, p in model_without_ddp.named_parameters() if "backbone" in n and p.requires_grad],
             "lr": args.lr_backbone,
+        },
+        ## changes here
+        {
+            "params": [p for n, p in model_without_ddp.named_parameters() 
+                      if "encoder_depth" in n and p.requires_grad],
+            "lr": args.lr * 1.0,  # Depth Encoder: 通常学習率（新規パラメータ）
+        },
+        {
+            "params": [p for n, p in model_without_ddp.named_parameters() 
+                      if "fusion_mlp" in n and p.requires_grad],
+            "lr": args.lr * 1.0,  # Fusion MLP: 通常学習率（新規パラメータ）
         },
     ]
     optimizer = torch.optim.AdamW(param_dicts, lr=args.lr,

@@ -10,6 +10,7 @@ import torch
 import torch.utils.data
 import torchvision
 from pycocotools import mask as coco_mask
+from PIL import Image
 
 import datasets.transforms as T
 
@@ -28,6 +29,43 @@ class CocoDetection(torchvision.datasets.CocoDetection):
         if self._transforms is not None:
             img, target = self._transforms(img, target)
         return img, target
+
+## changes here - Depth用のデータセットクラス
+class CocoDetection_Depth(torchvision.datasets.CocoDetection):
+    def __init__(self, img_folder, ann_file, transforms, return_masks, depth_folder=None):
+        super(CocoDetection_Depth, self).__init__(img_folder, ann_file)
+        self._transforms = transforms
+        self.prepare = ConvertCocoPolysToMask(return_masks)
+        self.depth_folder = depth_folder  # Depthフォルダのパス
+
+    def __getitem__(self, idx):
+        img, target = super(CocoDetection_Depth, self).__getitem__(idx)
+        image_id = self.ids[idx]
+        target = {'image_id': image_id, 'annotations': target}
+        img, target = self.prepare(img, target)
+        
+        # ★Depth画像の読み込み
+        depth_img = None
+        if self.depth_folder is not None:
+            # 画像ファイル名を取得
+            coco_img = self.coco.loadImgs(image_id)[0]
+            img_filename = coco_img['file_name']
+            # Depthファイル名を生成（例: 000000000139.jpg -> 000000000139.png）
+            depth_filename = img_filename.replace('.jpg', '.png')
+            depth_path = os.path.join(self.depth_folder, depth_filename)
+            
+            if os.path.exists(depth_path):
+                depth_img = Image.open(depth_path).convert('L')  # グレースケール読み込み
+            else:
+                # Depthがない場合はダミー（黒画像）
+                print(f"Warning: Depth image not found: {depth_path}")
+                depth_img = Image.new('L', img.size, 0)
+        
+        # Transformsを適用
+        if self._transforms is not None:
+            img, depth_img, target = self._transforms(img, depth_img, target)
+        
+        return img, depth_img, target
 
 
 def convert_coco_poly_to_mask(segmentations, height, width):
@@ -112,34 +150,60 @@ class ConvertCocoPolysToMask(object):
         return image, target
 
 
-def make_coco_transforms(image_set):
+def make_coco_transforms(image_set, use_depth=False):
 
     normalize = T.Compose([
         T.ToTensor(),
         T.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
     ])
 
+    ## changes here
+    normalize_depth = T.Compose([
+        T.ToTensor(),
+        T.Normalize([0.5], [0.5])  # Depthは1チャンネル
+    ])
+
     scales = [480, 512, 544, 576, 608, 640, 672, 704, 736, 768, 800]
 
     if image_set == 'train':
-        return T.Compose([
-            T.RandomHorizontalFlip(),
-            T.RandomSelect(
-                T.RandomResize(scales, max_size=1333),
-                T.Compose([
-                    T.RandomResize([400, 500, 600]),
-                    T.RandomSizeCrop(384, 600),
+        if use_depth:
+            return T.Compose([
+                T.RandomHorizontalFlip(),
+                T.RandomSelect(
                     T.RandomResize(scales, max_size=1333),
-                ])
-            ),
-            normalize,
-        ])
+                    T.Compose([
+                        T.RandomResize([400, 500, 600]),
+                        T.RandomSizeCrop(384, 600),
+                        T.RandomResize(scales, max_size=1333),
+                    ])
+                ),
+                T.NormalizeWithDepth(normalize, normalize_depth),  # RGB+Depth用
+            ])
+        else:
+            return T.Compose([
+                T.RandomHorizontalFlip(),
+                T.RandomSelect(
+                    T.RandomResize(scales, max_size=1333),
+                    T.Compose([
+                        T.RandomResize([400, 500, 600]),
+                        T.RandomSizeCrop(384, 600),
+                        T.RandomResize(scales, max_size=1333),
+                    ])
+                ),
+                normalize,
+            ])
 
     if image_set == 'val':
-        return T.Compose([
-            T.RandomResize([800], max_size=1333),
-            normalize,
-        ])
+        if use_depth:
+            return T.Compose([
+                T.RandomResize([800], max_size=1333),
+                T.NormalizeWithDepth(normalize, normalize_depth),
+            ])
+        else:
+            return T.Compose([
+                T.RandomResize([800], max_size=1333),
+                normalize,
+            ])
 
     raise ValueError(f'unknown {image_set}')
 
@@ -154,5 +218,20 @@ def build(image_set, args):
     }
 
     img_folder, ann_file = PATHS[image_set]
-    dataset = CocoDetection(img_folder, ann_file, transforms=make_coco_transforms(image_set), return_masks=args.masks)
+
+    ## changes here - Depthの有無で分岐
+    if args.use_depth and args.depth_path:
+        depth_folder = Path(args.depth_path) / f"{image_set}2017"
+        dataset = CocoDetection_Depth(
+            img_folder, ann_file, 
+            transforms=make_coco_transforms(image_set, use_depth=True),
+            return_masks=args.masks,
+            depth_folder=depth_folder
+        )
+    else:
+        dataset = CocoDetection(
+            img_folder, ann_file, 
+            transforms=make_coco_transforms(image_set, use_depth=False),
+            return_masks=args.masks
+        )
     return dataset

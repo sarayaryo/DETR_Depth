@@ -199,6 +199,54 @@ class RandomResize(object):
         return resize(img, target, size, self.max_size)
 
 
+## changes here
+class RandomHorizontalFlip_Depth(object):
+    def __init__(self, p=0.5):
+        self.p = p
+
+    def __call__(self, img, target_or_depth, target=None):
+        # Depth対応: 3引数の場合
+        if target is not None:
+            depth_img = target_or_depth
+            if random.random() < self.p:
+                img_flipped, target_flipped = hflip(img, target)
+                if depth_img is not None:
+                    depth_img_flipped, _ = hflip(depth_img, None)
+                else:
+                    depth_img_flipped = None
+                return img_flipped, depth_img_flipped, target_flipped
+            return img, depth_img, target
+        # 既存の2引数の場合（互換性維持）
+        else:
+            target = target_or_depth
+            if random.random() < self.p:
+                return hflip(img, target)
+            return img, target
+
+
+class RandomResize_Depth(object):
+    def __init__(self, sizes, max_size=None):
+        assert isinstance(sizes, (list, tuple))
+        self.sizes = sizes
+        self.max_size = max_size
+
+    def __call__(self, img, target_or_depth=None, target=None):
+        size = random.choice(self.sizes)
+        
+        # Depth対応: 3引数の場合
+        if target is not None:
+            depth_img = target_or_depth
+            img_resized, target_resized = resize(img, target, size, self.max_size)
+            if depth_img is not None:
+                depth_img_resized, _ = resize(depth_img, None, size, self.max_size)
+            else:
+                depth_img_resized = None
+            return img_resized, depth_img_resized, target_resized
+        # 既存の2引数の場合
+        else:
+            return resize(img, target_or_depth, size, self.max_size)
+
+
 class RandomPad(object):
     def __init__(self, max_pad):
         self.max_pad = max_pad
@@ -257,6 +305,22 @@ class Normalize(object):
             target["boxes"] = boxes
         return image, target
 
+## changes here
+class NormalizeWithDepth(object):
+    """RGB画像とDepth画像の両方を正規化するクラス"""
+    def __init__(self, normalize_rgb, normalize_depth):
+        self.normalize_rgb = normalize_rgb
+        self.normalize_depth = normalize_depth
+
+    def __call__(self, image, depth, target):
+        # RGB画像を正規化
+        image, target = self.normalize_rgb(image, target)
+        
+        # Depth画像を正規化
+        if depth is not None:
+            depth, _ = self.normalize_depth(depth, None)
+        
+        return image, depth, target
 
 class Compose(object):
     def __init__(self, transforms):

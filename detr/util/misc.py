@@ -266,10 +266,19 @@ def get_sha():
     return message
 
 
+## changes here
 def collate_fn(batch):
-    batch = list(zip(*batch))
-    batch[0] = nested_tensor_from_tensor_list(batch[0])
-    return tuple(batch)
+    if len(batch[0]) == 2:
+        # RGBのみの場合でも3要素にする
+        batch = list(zip(*batch))
+        batch[0] = nested_tensor_from_tensor_list(batch[0])
+        return batch[0], None, batch[1]  # samples, None, targets
+    elif len(batch[0]) == 3:
+        # RGB+Depth
+        batch = list(zip(*batch))
+        batch[0] = nested_tensor_from_tensor_list(batch[0])
+        batch[1] = nested_tensor_from_tensor_list(batch[1])
+        return batch[0], batch[1], batch[2]  # samples, samples_depth, targets
 
 
 def _max_by_axis(the_list):

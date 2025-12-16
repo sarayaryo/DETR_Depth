@@ -82,6 +82,7 @@ class Transformer(nn.Module):
             memory_concat = torch.cat((memory, memory_depth), dim=2)  
             # MLP Fusion: (HW, B, 512) -> (HW, B, 256)
             memory_fused = self.fusion_mlp(memory_concat)
+            memory = memory_fused
             
         else:
             memory_depth = None
