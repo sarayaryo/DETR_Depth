@@ -28,6 +28,21 @@ class Transformer(nn.Module):
         encoder_norm = nn.LayerNorm(d_model) if normalize_before else None
         self.encoder = TransformerEncoder(encoder_layer, num_encoder_layers, encoder_norm)
 
+        ## changes here
+        encoder_layer_depth = TransformerEncoderLayer(d_model, nhead, dim_feedforward,
+                                                dropout, activation, normalize_before)
+        encoder_norm_depth = nn.LayerNorm(d_model) if normalize_before else None
+        self.encoder_depth = TransformerEncoder(encoder_layer_depth, num_encoder_layers, encoder_norm_depth)
+
+        ## changes here
+        self.fusion_mlp = nn.Sequential(
+            nn.Linear(d_model * 2, d_model * 2),  # 512 -> 512
+            nn.ReLU(),
+            nn.Dropout(dropout),
+            nn.Linear(d_model * 2, d_model)  # 512 -> 256
+        )
+
+
         decoder_layer = TransformerDecoderLayer(d_model, nhead, dim_feedforward,
                                                 dropout, activation, normalize_before)
         decoder_norm = nn.LayerNorm(d_model)
@@ -44,7 +59,7 @@ class Transformer(nn.Module):
             if p.dim() > 1:
                 nn.init.xavier_uniform_(p)
 
-    def forward(self, src, mask, query_embed, pos_embed):
+    def forward(self, src, mask, query_embed, pos_embed, src_depth=None, pos_embed_depth=None):
         # flatten NxCxHxW to HWxNxC
         bs, c, h, w = src.shape
         src = src.flatten(2).permute(2, 0, 1)
@@ -54,9 +69,32 @@ class Transformer(nn.Module):
 
         tgt = torch.zeros_like(query_embed)
         memory = self.encoder(src, src_key_padding_mask=mask, pos=pos_embed)
+
+        ## changes here
+        if src_depth is not None:
+            src_depth = src_depth.flatten(2).permute(2, 0, 1)
+            if pos_embed_depth is not None:
+                pos_embed_depth = pos_embed_depth.flatten(2).permute(2, 0, 1)
+            else:
+                pos_embed_depth = pos_embed
+            memory_depth = self.encoder_depth(src_depth, src_key_padding_mask=mask, pos=pos_embed_depth)
+            # fusion  Concatenate: (HW, B, 256) + (HW, B, 256) -> (HW, B, 512)
+            memory_concat = torch.cat((memory, memory_depth), dim=2)  
+            # MLP Fusion: (HW, B, 512) -> (HW, B, 256)
+            memory_fused = self.fusion_mlp(memory_concat)
+            
+        else:
+            memory_depth = None
+
+
         hs, attn_weights = self.decoder(tgt, memory, memory_key_padding_mask=mask, ## changes here
                           pos=pos_embed, query_pos=query_embed)
-        return hs.transpose(1, 2), attn_weights, memory.permute(1, 2, 0).view(bs, c, h, w) ## changes here  
+        
+        ## changes here
+        if memory_depth is not None:
+            return hs.transpose(1, 2), attn_weights, memory.permute(1, 2, 0).view(bs, c, h, w), memory_depth.permute(1, 2, 0).view(bs, c, h, w)
+        else:
+            return hs.transpose(1, 2), attn_weights, memory.permute(1, 2, 0).view(bs, c, h, w) ## changes here  
 
 
 class TransformerEncoder(nn.Module):

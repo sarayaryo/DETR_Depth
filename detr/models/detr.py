@@ -41,7 +41,7 @@ class DETR(nn.Module):
         self.backbone = backbone
         self.aux_loss = aux_loss
 
-    def forward(self, samples: NestedTensor):
+    def forward(self, samples: NestedTensor, samples_depth: NestedTensor = None):
         """ The forward expects a NestedTensor, which consists of:
                - samples.tensor: batched images, of shape [batch_size x 3 x H x W]
                - samples.mask: a binary mask of shape [batch_size x H x W], containing 1 on padded pixels
@@ -62,10 +62,26 @@ class DETR(nn.Module):
 
         src, mask = features[-1].decompose()
 
-        bs, c, h_feat, w_feat = src.shape ## changes here ##特徴マップの形状を取得 (Batch, Channel, Height, Width)
+        ## changes here ##特徴マップの形状を取得 (Batch, Channel, Height, Width)
+        bs, c, h_feat, w_feat = src.shape 
 
-        assert mask is not None
-        hs, attn_weights, _ = self.transformer(self.input_proj(src), mask, self.query_embed.weight, pos[-1]) 
+        ## chaneges here
+        if samples_depth is not None:
+            if isinstance(samples_depth, (list, torch.Tensor)):
+                samples_depth = nested_tensor_from_tensor_list(samples_depth)
+            features_depth, pos_depth = self.backbone(samples_depth)  # または専用backbone
+            src_depth, _ = features_depth[-1].decompose()
+        else:
+            src_depth = None
+            pos_depth = None
+        
+        ## changes here
+        if src_depth is not None:
+            assert mask is not None
+            hs, attn_weights, _ , _= self.transformer(self.input_proj(src), mask, self.query_embed.weight, pos[-1], src_depth, pos_depth[-1])  
+        else:
+            assert mask is not None
+            hs, attn_weights, _ = self.transformer(self.input_proj(src), mask, self.query_embed.weight, pos[-1]) 
 
         outputs_class = self.class_embed(hs)
         outputs_coord = self.bbox_embed(hs).sigmoid()
