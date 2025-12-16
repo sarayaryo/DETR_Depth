@@ -107,6 +107,10 @@ def get_args_parser():
                         help='path to depth images folder')
     parser.add_argument('--use_depth', action='store_true',
                         help='use depth images for training')
+    parser.add_argument('--debug', action='store_true',
+                        help='use a small subset of the dataset for debugging')
+    parser.add_argument('--val_split', action='store_true',
+                        help='use split validation set (train: 4000, test: 1000)')
 
     return parser
 
@@ -138,10 +142,14 @@ def main(args):
     print('number of params:', n_parameters)
 
     param_dicts = [
-        {"params": [p for n, p in model_without_ddp.named_parameters() if "backbone" not in n 
-                    ## changes here
-                    and "encoder_depth" not in n and "fusion_mlp" not in n and p.requires_grad ],
-                    "lr": args.lr},
+        {"params": [p for n, p in model_without_ddp.named_parameters() 
+                       if "backbone" not in n 
+                       and "encoder_depth" not in n 
+                       and "fusion_mlp" not in n 
+                       and "input_proj" not in n  # input_proj系はここで除外
+                       and p.requires_grad],
+        "lr": args.lr
+        },
         {
             "params": [p for n, p in model_without_ddp.named_parameters() if "backbone" in n and p.requires_grad],
             "lr": args.lr_backbone,
@@ -156,6 +164,11 @@ def main(args):
             "params": [p for n, p in model_without_ddp.named_parameters() 
                       if "fusion_mlp" in n and p.requires_grad],
             "lr": args.lr * 1.0,  # Fusion MLP: 通常学習率（新規パラメータ）
+        },
+        {
+            "params": [p for n, p in model_without_ddp.named_parameters() 
+                      if "input_proj_depth" in n and p.requires_grad],
+            "lr": args.lr * 1.0, # input_proj_depth: 通常学習率（新規パラメータ）
         },
     ]
     optimizer = torch.optim.AdamW(param_dicts, lr=args.lr,
@@ -198,7 +211,32 @@ def main(args):
                 args.resume, map_location='cpu', check_hash=True)
         else:
             checkpoint = torch.load(args.resume, map_location='cpu')
-        model_without_ddp.load_state_dict(checkpoint['model'])
+        ## changes here - strict=Falseでロード
+        missing_keys, unexpected_keys = model_without_ddp.load_state_dict(checkpoint['model'], strict=False)
+        print("Loading pretrained weights...")
+        if missing_keys:
+            print(f"Missing keys (new parameters): {len(missing_keys)} keys")
+            for key in missing_keys[:3]:
+                print(f"  - {key}")
+            if len(missing_keys) > 3:
+                print(f"  ... and {len(missing_keys) - 3} more")
+
+        if args.use_depth:
+            print("\nCopying RGB Encoder weights to Depth Encoder...")
+            rgb_encoder_state = model_without_ddp.transformer.encoder.state_dict()
+            model_without_ddp.transformer.encoder_depth.load_state_dict(rgb_encoder_state)
+            print("Depth Encoder initialized with RGB Encoder weights!")
+            
+            # RGB Encoderを固定
+            for param in model_without_ddp.input_proj.parameters():
+                param.requires_grad = False
+            print("RGB input_proj frozen!")
+            for param in model_without_ddp.transformer.encoder.parameters():
+                param.requires_grad = False
+            print("RGB Encoder parameters frozen!")
+
+        # model_without_ddp.load_state_dict(checkpoint['model'])
+        
         if not args.eval and 'optimizer' in checkpoint and 'lr_scheduler' in checkpoint and 'epoch' in checkpoint:
             optimizer.load_state_dict(checkpoint['optimizer'])
             lr_scheduler.load_state_dict(checkpoint['lr_scheduler'])

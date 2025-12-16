@@ -51,11 +51,13 @@ class CocoDetection_Depth(torchvision.datasets.CocoDetection):
             coco_img = self.coco.loadImgs(image_id)[0]
             img_filename = coco_img['file_name']
             # Depthファイル名を生成（例: 000000000139.jpg -> 000000000139.png）
-            depth_filename = img_filename.replace('.jpg', '.png')
+            import os
+            depth_filename = os.path.splitext(img_filename)[0] + '.png'
             depth_path = os.path.join(self.depth_folder, depth_filename)
             
             if os.path.exists(depth_path):
                 depth_img = Image.open(depth_path).convert('L')  # グレースケール読み込み
+                depth_img = depth_img.convert('RGB')  # 3チャンネルに変換
             else:
                 # Depthがない場合はダミー（黒画像）
                 print(f"Warning: Depth image not found: {depth_path}")
@@ -160,24 +162,24 @@ def make_coco_transforms(image_set, use_depth=False):
     ## changes here
     normalize_depth = T.Compose([
         T.ToTensor(),
-        T.Normalize([0.5], [0.5])  # Depthは1チャンネル
+        T.Normalize([0.5, 0.5, 0.5], [0.5, 0.5, 0.5]) 
     ])
 
     scales = [480, 512, 544, 576, 608, 640, 672, 704, 736, 768, 800]
 
     if image_set == 'train':
         if use_depth:
-            return T.Compose([
-                T.RandomHorizontalFlip(),
-                T.RandomSelect(
-                    T.RandomResize(scales, max_size=1333),
-                    T.Compose([
-                        T.RandomResize([400, 500, 600]),
-                        T.RandomSizeCrop(384, 600),
-                        T.RandomResize(scales, max_size=1333),
+            return T.ComposeWithDepth([
+                T.RandomHorizontalFlip_Depth(),
+                T.RandomSelect_Depth(
+                    T.RandomResize_Depth(scales, max_size=1333),
+                    T.ComposeWithDepth([
+                        T.RandomResize_Depth([400, 500, 600]),
+                        T.RandomSizeCrop_Depth(384, 600),
+                        T.RandomResize_Depth(scales, max_size=1333),
                     ])
                 ),
-                T.NormalizeWithDepth(normalize, normalize_depth),  # RGB+Depth用
+                T.NormalizeWithDepth(normalize, normalize_depth),
             ])
         else:
             return T.Compose([
@@ -195,8 +197,9 @@ def make_coco_transforms(image_set, use_depth=False):
 
     if image_set == 'val':
         if use_depth:
-            return T.Compose([
-                T.RandomResize([800], max_size=1333),
+            ## changes here - ComposeWithDepthに修正
+            return T.ComposeWithDepth([
+                T.RandomResize_Depth([800], max_size=1333),
                 T.NormalizeWithDepth(normalize, normalize_depth),
             ])
         else:
@@ -212,16 +215,29 @@ def build(image_set, args):
     root = Path(args.coco_path)
     assert root.exists(), f'provided COCO path {root} does not exist'
     mode = 'instances'
-    PATHS = {
-        "train": (root / "train2017", root / "annotations" / f'{mode}_train2017.json'),
-        "val": (root / "val2017", root / "annotations" / f'{mode}_val2017.json'),
-    }
+    ## changes here - val_splitフラグ
+    if hasattr(args, 'val_split') and args.val_split:
+        PATHS = {
+            "train": (root / "val2017", root / "annotations" / "instances_val2017_train_split.json"),
+            "val": (root / "val2017", root / "annotations" / "instances_val2017_test_split.json"),
+        }
+        print(f"Using split validation dataset for {image_set}")
+    else:
+        # 通常のCOCOデータセット
+        PATHS = {
+            "train": (root / "train2017", root / "annotations" / f'{mode}_train2017.json'),
+            "val": (root / "val2017", root / "annotations" / f'{mode}_val2017.json'),
+        }
+    
 
     img_folder, ann_file = PATHS[image_set]
 
     ## changes here - Depthの有無で分岐
     if args.use_depth and args.depth_path:
-        depth_folder = Path(args.depth_path) / f"{image_set}2017"
+        if hasattr(args, 'val_split') and args.val_split:
+            depth_folder = Path(args.depth_path) / "val2017"
+        else:
+            depth_folder = Path(args.depth_path) / f"{image_set}2017"
         dataset = CocoDetection_Depth(
             img_folder, ann_file, 
             transforms=make_coco_transforms(image_set, use_depth=True),
@@ -234,4 +250,9 @@ def build(image_set, args):
             transforms=make_coco_transforms(image_set, use_depth=False),
             return_masks=args.masks
         )
+    
+    if hasattr(args, 'debug') and args.debug:
+        subset_size = min(100, len(dataset))
+        dataset = torch.utils.data.Subset(dataset, range(subset_size))
+        
     return dataset

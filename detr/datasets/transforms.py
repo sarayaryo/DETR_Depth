@@ -165,6 +165,24 @@ class RandomSizeCrop(object):
         region = T.RandomCrop.get_params(img, [h, w])
         return crop(img, target, region)
 
+## changes here - Depth用のRandomSizeCrop
+class RandomSizeCrop_Depth(object):
+    def __init__(self, min_size: int, max_size: int):
+        self.min_size = min_size
+        self.max_size = max_size
+
+    def __call__(self, img, depth_img, target):
+        w = random.randint(self.min_size, min(img.width, self.max_size))
+        h = random.randint(self.min_size, min(img.height, self.max_size))
+        region = T.RandomCrop.get_params(img, [h, w])
+        
+        img_cropped, target_cropped = crop(img, target, region)
+        if depth_img is not None:
+            depth_img_cropped = F.crop(depth_img, *region)
+        else:
+            depth_img_cropped = None
+        
+        return img_cropped, depth_img_cropped, target_cropped
 
 class CenterCrop(object):
     def __init__(self, size):
@@ -187,6 +205,20 @@ class RandomHorizontalFlip(object):
             return hflip(img, target)
         return img, target
 
+class RandomHorizontalFlip_Depth(object):
+    def __init__(self, p=0.5):
+        self.p = p
+
+    def __call__(self, img, depth_img, target):
+        if random.random() < self.p:
+            img_flipped, target_flipped = hflip(img, target)
+            if depth_img is not None:
+                ## changes here - hflipを使わず直接F.hflipを使用
+                depth_img_flipped = F.hflip(depth_img)
+            else:
+                depth_img_flipped = None
+            return img_flipped, depth_img_flipped, target_flipped
+        return img, depth_img, target
 
 class RandomResize(object):
     def __init__(self, sizes, max_size=None):
@@ -198,30 +230,22 @@ class RandomResize(object):
         size = random.choice(self.sizes)
         return resize(img, target, size, self.max_size)
 
+## changes here - Depth用のRandomResize
+class RandomResize_Depth(object):
+    def __init__(self, sizes, max_size=None):
+        assert isinstance(sizes, (list, tuple))
+        self.sizes = sizes
+        self.max_size = max_size
 
-## changes here
-class RandomHorizontalFlip_Depth(object):
-    def __init__(self, p=0.5):
-        self.p = p
-
-    def __call__(self, img, target_or_depth, target=None):
-        # Depth対応: 3引数の場合
-        if target is not None:
-            depth_img = target_or_depth
-            if random.random() < self.p:
-                img_flipped, target_flipped = hflip(img, target)
-                if depth_img is not None:
-                    depth_img_flipped, _ = hflip(depth_img, None)
-                else:
-                    depth_img_flipped = None
-                return img_flipped, depth_img_flipped, target_flipped
-            return img, depth_img, target
-        # 既存の2引数の場合（互換性維持）
+    def __call__(self, img, depth_img, target):
+        size = random.choice(self.sizes)
+        img_resized, target_resized = resize(img, target, size, self.max_size)
+        if depth_img is not None:
+            depth_img_resized, _ = resize(depth_img, None, size, self.max_size)
         else:
-            target = target_or_depth
-            if random.random() < self.p:
-                return hflip(img, target)
-            return img, target
+            depth_img_resized = None
+        return img_resized, depth_img_resized, target_resized
+
 
 
 class RandomResize_Depth(object):
@@ -272,6 +296,17 @@ class RandomSelect(object):
             return self.transforms1(img, target)
         return self.transforms2(img, target)
 
+## changes here - Depth用のRandomSelect
+class RandomSelect_Depth(object):
+    def __init__(self, transforms1, transforms2, p=0.5):
+        self.transforms1 = transforms1
+        self.transforms2 = transforms2
+        self.p = p
+
+    def __call__(self, img, depth_img, target):
+        if random.random() < self.p:
+            return self.transforms1(img, depth_img, target)
+        return self.transforms2(img, depth_img, target)
 
 class ToTensor(object):
     def __call__(self, img, target):
@@ -330,6 +365,24 @@ class Compose(object):
         for t in self.transforms:
             image, target = t(image, target)
         return image, target
+
+    def __repr__(self):
+        format_string = self.__class__.__name__ + "("
+        for t in self.transforms:
+            format_string += "\n"
+            format_string += "    {0}".format(t)
+        format_string += "\n)"
+        return format_string
+
+## changes here - Depth用のCompose
+class ComposeWithDepth(object):
+    def __init__(self, transforms):
+        self.transforms = transforms
+
+    def __call__(self, image, depth, target):
+        for t in self.transforms:
+            image, depth, target = t(image, depth, target)
+        return image, depth, target
 
     def __repr__(self):
         format_string = self.__class__.__name__ + "("
