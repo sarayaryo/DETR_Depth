@@ -17,6 +17,57 @@ from engine import evaluate, train_one_epoch
 from models import build_model
 from models.backbone import print_parameter_status
 
+### changes here - EarlyStoppingクラスの追加
+class EarlyStopping:
+    """Early stops the training if validation score doesn't improve after a given patience."""
+    def __init__(self, patience=10, verbose=False, delta=0, path='checkpoint.pth', trace_func=print):
+        """
+        Args:
+            patience (int): How long to wait after last time validation score improved.
+            verbose (bool): If True, prints a message for each validation loss improvement.
+            delta (float): Minimum change in the monitored quantity to qualify as an improvement.
+            path (str): Path for the checkpoint to be saved to.
+            trace_func (function): trace print function.
+        """
+        self.patience = patience
+        self.verbose = verbose
+        self.counter = 0
+        self.best_score = None
+        self.early_stop = False
+        self.val_score_max = -100000
+        self.delta = delta
+        self.path = path
+        self.trace_func = trace_func
+
+    def __call__(self, val_score, model):
+        score = val_score
+
+        if self.best_score is None:
+            self.best_score = score
+            self.save_checkpoint(score, model)
+        elif score < self.best_score + self.delta:
+            self.counter += 1
+            if self.verbose:
+                self.trace_func(f'EarlyStopping counter: {self.counter} out of {self.patience}')
+            if self.counter >= self.patience:
+                self.early_stop = True
+        else:
+            self.best_score = score
+            self.save_checkpoint(score, model)
+            self.counter = 0
+
+    def save_checkpoint(self, val_score, model):
+        '''Saves model when validation score increase.'''
+        if self.verbose:
+            self.trace_func(f'Validation score increased ({self.val_score_max:.6f} --> {val_score:.6f}).  Saving model ...')
+        
+        # モデルの保存（DDP対応）
+        if isinstance(model, torch.nn.DataParallel) or isinstance(model, torch.nn.parallel.DistributedDataParallel):
+            torch.save({'model': model.module.state_dict()}, self.path)
+        else:
+            torch.save({'model': model.state_dict()}, self.path)
+            
+        self.val_score_max = val_score
 
 
 def get_args_parser():
@@ -113,6 +164,8 @@ def get_args_parser():
                         help='use a small subset of the dataset for debugging')
     parser.add_argument('--val_split', action='store_true',
                         help='use split validation set (train: 4000, test: 1000)')
+    parser.add_argument('--patience', default=3, type=int,
+                        help='Early stopping patience (epochs)')
 
     return parser
 
@@ -258,6 +311,8 @@ def main(args):
             utils.save_on_master(coco_evaluator.coco_eval["bbox"].eval, output_dir / "eval.pth")
         return
 
+    early_stopping = EarlyStopping(patience=args.patience, verbose=True, path=str(Path(args.output_dir) / 'best_model.pth'))
+
     print("Start training")
     start_time = time.time()
     for epoch in range(args.start_epoch, args.epochs):
@@ -285,10 +340,20 @@ def main(args):
         ## changes here
         test_stats = {}
         coco_evaluator = None
-        if (epoch + 1) % 10 == 0 or (epoch + 1) == args.epochs:
+        if (epoch + 1) % 5 == 0 or (epoch + 1) == args.epochs:
             test_stats, coco_evaluator = evaluate(
                 model, criterion, postprocessors, data_loader_val, base_ds, device, args.output_dir, epoch=epoch
             )
+            if coco_evaluator is not None and 'bbox' in coco_evaluator.coco_eval:
+                # mAP (IoU=0.50:0.95) を監視対象にする
+                val_mAP = coco_evaluator.coco_eval['bbox'].stats[0]
+                
+                # ベストモデル更新チェック & ストップ判定
+                early_stopping(val_mAP, model_without_ddp)
+                
+                if early_stopping.early_stop:
+                    print("Early stopping triggered!")
+                    break
 
         log_stats = {**{f'train_{k}': v for k, v in train_stats.items()},
                      **{f'test_{k}': v for k, v in test_stats.items()},

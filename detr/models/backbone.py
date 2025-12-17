@@ -138,9 +138,9 @@ def print_parameter_status(model_without_ddp):
     n_dec_trainable = sum(p.numel() for p in model_without_ddp.transformer.decoder.parameters() if p.requires_grad)
     print(f"Decoder: {n_dec:,} params, {n_dec_trainable:,} trainable")
     
-    # Fusion MLP
-    n_fusion = sum(p.numel() for p in model_without_ddp.transformer.fusion_mlp.parameters())
-    n_fusion_trainable = sum(p.numel() for p in model_without_ddp.transformer.fusion_mlp.parameters() if p.requires_grad)
-    print(f"Fusion MLP: {n_fusion:,} params, {n_fusion_trainable:,} trainable")
+    # # Fusion MLP
+    # n_fusion = sum(p.numel() for p in model_without_ddp.transformer.fusion_mlp.parameters())
+    # n_fusion_trainable = sum(p.numel() for p in model_without_ddp.transformer.fusion_mlp.parameters() if p.requires_grad)
+    # print(f"Fusion MLP: {n_fusion:,} params, {n_fusion_trainable:,} trainable")
     
     print("="*80 + "\n")
