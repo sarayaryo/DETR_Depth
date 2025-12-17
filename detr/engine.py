@@ -23,7 +23,7 @@ def train_one_epoch(model: torch.nn.Module, criterion: torch.nn.Module,
     metric_logger.add_meter('lr', utils.SmoothedValue(window_size=1, fmt='{value:.6f}'))
     metric_logger.add_meter('class_error', utils.SmoothedValue(window_size=1, fmt='{value:.2f}'))
     header = 'Epoch: [{}]'.format(epoch)
-    print_freq = 10
+    print_freq = 5000
 
     for samples, samples_depth, targets in metric_logger.log_every(data_loader, print_freq, header):
         samples = samples.to(device)
@@ -59,17 +59,21 @@ def train_one_epoch(model: torch.nn.Module, criterion: torch.nn.Module,
             torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm)
         optimizer.step()
 
-        metric_logger.update(loss=loss_value, **loss_dict_reduced_scaled, **loss_dict_reduced_unscaled)
+        # metric_logger.update(loss=loss_value, **loss_dict_reduced_scaled, **loss_dict_reduced_unscaled)
+        # metric_logger.update(class_error=loss_dict_reduced['class_error'])
+        # metric_logger.update(lr=optimizer.param_groups[0]["lr"])
+        metric_logger.update(loss=loss_value)
         metric_logger.update(class_error=loss_dict_reduced['class_error'])
-        metric_logger.update(lr=optimizer.param_groups[0]["lr"])
     # gather the stats from all processes
     metric_logger.synchronize_between_processes()
-    print("Averaged stats:", metric_logger)
+    # print("Averaged stats:", metric_logger)
+    print(f"Epoch [{epoch}] Train - Loss: {metric_logger.meters['loss'].global_avg:.4f}, "
+          f"Class Error: {metric_logger.meters['class_error'].global_avg:.2f}")
     return {k: meter.global_avg for k, meter in metric_logger.meters.items()}
 
 
 @torch.no_grad()
-def evaluate(model, criterion, postprocessors, data_loader, base_ds, device, output_dir):
+def evaluate(model, criterion, postprocessors, data_loader, base_ds, device, output_dir, epoch=None):
     model.eval()
     criterion.eval()
 
@@ -117,6 +121,7 @@ def evaluate(model, criterion, postprocessors, data_loader, base_ds, device, out
             results = postprocessors['segm'](results, outputs, orig_target_sizes, target_sizes)
         res = {target['image_id'].item(): output for target, output in zip(targets, results)}
         if coco_evaluator is not None:
+            # changes here
             coco_evaluator.update(res)
 
         if panoptic_evaluator is not None:
@@ -131,7 +136,7 @@ def evaluate(model, criterion, postprocessors, data_loader, base_ds, device, out
 
     # gather the stats from all processes
     metric_logger.synchronize_between_processes()
-    print("Averaged stats:", metric_logger)
+    # print("Averaged stats:", metric_logger)
     if coco_evaluator is not None:
         coco_evaluator.synchronize_between_processes()
     if panoptic_evaluator is not None:
@@ -141,9 +146,23 @@ def evaluate(model, criterion, postprocessors, data_loader, base_ds, device, out
     if coco_evaluator is not None:
         coco_evaluator.accumulate()
         coco_evaluator.summarize()
+        ## changes here
+        # summarize()を呼ばないことで詳細な12行の出力を抑制       
+        # APとARのみ取得して簡潔に表示
+        if 'bbox' in coco_evaluator.coco_eval:
+            print(f"coco_evaluator.coco_eval['bbox'].stats: {coco_evaluator.coco_eval['bbox'].stats}")
+            stats = coco_evaluator.coco_eval['bbox'].stats
+            ap = stats[0]  # AP@[0.5:0.95]
+            ap50 = stats[1]  # AP@0.5
+            ap75 = stats[2]  # AP@0.75
+            ar = stats[8]  # AR@[0.5:0.95]
+            print(f"Epoch [{epoch}] Val - AP: {ap:.3f}, AP50: {ap50:.3f}, AP75: {ap75:.3f}, AR: {ar:.3f}, "
+                  f"Loss: {metric_logger.meters['loss'].global_avg:.4f}")
+       
     panoptic_res = None
     if panoptic_evaluator is not None:
         panoptic_res = panoptic_evaluator.summarize()
+
     stats = {k: meter.global_avg for k, meter in metric_logger.meters.items()}
     if coco_evaluator is not None:
         if 'bbox' in postprocessors.keys():

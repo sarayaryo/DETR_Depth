@@ -35,12 +35,12 @@ class Transformer(nn.Module):
         self.encoder_depth = TransformerEncoder(encoder_layer_depth, num_encoder_layers, encoder_norm_depth)
 
         ## changes here
-        self.fusion_mlp = nn.Sequential(
-            nn.Linear(d_model * 2, d_model * 2),  # 512 -> 512
-            nn.ReLU(),
-            nn.Dropout(dropout),
-            nn.Linear(d_model * 2, d_model)  # 512 -> 256
-        )
+        # self.fusion_mlp = nn.Sequential(
+        #     nn.Linear(d_model * 2, d_model * 2),  # 512 -> 512
+        #     nn.ReLU(),
+        #     nn.Dropout(dropout),
+        #     nn.Linear(d_model * 2, d_model)  # 512 -> 256
+        # )
 
 
         decoder_layer = TransformerDecoderLayer(d_model, nhead, dim_feedforward,
@@ -79,10 +79,11 @@ class Transformer(nn.Module):
                 pos_embed_depth = pos_embed
             memory_depth = self.encoder_depth(src_depth, src_key_padding_mask=mask, pos=pos_embed_depth)
             # fusion  Concatenate: (HW, B, 256) + (HW, B, 256) -> (HW, B, 512)
-            memory_concat = torch.cat((memory, memory_depth), dim=2)  
+            # memory_concat = torch.cat((memory, memory_depth), dim=2)  
             # MLP Fusion: (HW, B, 512) -> (HW, B, 256)
-            memory_fused = self.fusion_mlp(memory_concat)
-            memory = memory_fused
+            # memory_fused = self.fusion_mlp(memory_concat)
+            # memory = memory_fused
+            memory = memory + memory_depth  # Simple addition fusion
             
         else:
             memory_depth = None

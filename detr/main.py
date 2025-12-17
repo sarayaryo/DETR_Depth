@@ -15,6 +15,8 @@ import util.misc as utils
 from datasets import build_dataset, get_coco_api_from_dataset
 from engine import evaluate, train_one_epoch
 from models import build_model
+from models.backbone import print_parameter_status
+
 
 
 def get_args_parser():
@@ -145,7 +147,7 @@ def main(args):
         {"params": [p for n, p in model_without_ddp.named_parameters() 
                        if "backbone" not in n 
                        and "encoder_depth" not in n 
-                       and "fusion_mlp" not in n 
+                    #    and "fusion_mlp" not in n 
                        and "input_proj" not in n  # input_proj系はここで除外
                        and p.requires_grad],
         "lr": args.lr
@@ -160,11 +162,11 @@ def main(args):
                       if "encoder_depth" in n and p.requires_grad],
             "lr": args.lr * 1.0,  # Depth Encoder: 通常学習率（新規パラメータ）
         },
-        {
-            "params": [p for n, p in model_without_ddp.named_parameters() 
-                      if "fusion_mlp" in n and p.requires_grad],
-            "lr": args.lr * 1.0,  # Fusion MLP: 通常学習率（新規パラメータ）
-        },
+        # {
+        #     "params": [p for n, p in model_without_ddp.named_parameters() 
+        #               if "fusion_mlp" in n and p.requires_grad],
+        #     "lr": args.lr * 1.0,  # Fusion MLP: 通常学習率（新規パラメータ）
+        # },
         {
             "params": [p for n, p in model_without_ddp.named_parameters() 
                       if "input_proj_depth" in n and p.requires_grad],
@@ -177,13 +179,16 @@ def main(args):
 
     dataset_train = build_dataset(image_set='train', args=args)
     dataset_val = build_dataset(image_set='val', args=args)
+    data_loader_test = build_dataset(image_set='test', args=args) if args.eval else None
 
     if args.distributed:
         sampler_train = DistributedSampler(dataset_train)
         sampler_val = DistributedSampler(dataset_val, shuffle=False)
+        sampler_test = DistributedSampler(dataset_val, shuffle=False) if data_loader_test is not None else None
     else:
         sampler_train = torch.utils.data.RandomSampler(dataset_train)
         sampler_val = torch.utils.data.SequentialSampler(dataset_val)
+        sampler_test = torch.utils.data.SequentialSampler(dataset_val) if data_loader_test is not None else None
 
     batch_sampler_train = torch.utils.data.BatchSampler(
         sampler_train, args.batch_size, drop_last=True)
@@ -192,6 +197,8 @@ def main(args):
                                    collate_fn=utils.collate_fn, num_workers=args.num_workers)
     data_loader_val = DataLoader(dataset_val, args.batch_size, sampler=sampler_val,
                                  drop_last=False, collate_fn=utils.collate_fn, num_workers=args.num_workers)
+    data_loader_test = DataLoader(dataset_val, args.batch_size, sampler=sampler_test,
+                                 drop_last=False, collate_fn=utils.collate_fn, num_workers=args.num_workers) if data_loader_test is not None else None
 
     if args.dataset_file == "coco_panoptic":
         # We also evaluate AP during panoptic training, on original coco DS
@@ -230,10 +237,12 @@ def main(args):
             # RGB Encoderを固定
             for param in model_without_ddp.input_proj.parameters():
                 param.requires_grad = False
-            print("RGB input_proj frozen!")
             for param in model_without_ddp.transformer.encoder.parameters():
                 param.requires_grad = False
-            print("RGB Encoder parameters frozen!")
+            for param in model_without_ddp.transformer.decoder.parameters():
+                param.requires_grad = False
+            print("RGB input_proj, Encoder, Decoder parameters frozen!")
+            print_parameter_status(model_without_ddp)
 
         # model_without_ddp.load_state_dict(checkpoint['model'])
         
@@ -252,6 +261,7 @@ def main(args):
     print("Start training")
     start_time = time.time()
     for epoch in range(args.start_epoch, args.epochs):
+        
         if args.distributed:
             sampler_train.set_epoch(epoch)
         train_stats = train_one_epoch(
@@ -272,9 +282,13 @@ def main(args):
                     'args': args,
                 }, checkpoint_path)
 
-        test_stats, coco_evaluator = evaluate(
-            model, criterion, postprocessors, data_loader_val, base_ds, device, args.output_dir
-        )
+        ## changes here
+        test_stats = {}
+        coco_evaluator = None
+        if (epoch + 1) % 10 == 0 or (epoch + 1) == args.epochs:
+            test_stats, coco_evaluator = evaluate(
+                model, criterion, postprocessors, data_loader_val, base_ds, device, args.output_dir, epoch=epoch
+            )
 
         log_stats = {**{f'train_{k}': v for k, v in train_stats.items()},
                      **{f'test_{k}': v for k, v in test_stats.items()},
@@ -295,7 +309,12 @@ def main(args):
                     for name in filenames:
                         torch.save(coco_evaluator.coco_eval["bbox"].eval,
                                    output_dir / "eval" / name)
-
+    
+    if data_loader_test is not None:
+        print("Start testing on test set")
+        test_stats, coco_evaluator = evaluate(
+                    model, criterion, postprocessors, data_loader_test, base_ds, device, args.output_dir, epoch=epoch
+                )
     total_time = time.time() - start_time
     total_time_str = str(datetime.timedelta(seconds=int(total_time)))
     print('Training time {}'.format(total_time_str))

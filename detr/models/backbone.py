@@ -117,3 +117,30 @@ def build_backbone(args):
     model = Joiner(backbone, position_embedding)
     model.num_channels = backbone.num_channels
     return model
+
+def print_parameter_status(model_without_ddp):
+    print("\n" + "="*80)
+    print("Parameter Status Check:")
+    print("="*80)
+    
+    # RGB Encoder
+    n_rgb_enc = sum(p.numel() for p in model_without_ddp.transformer.encoder.parameters())
+    n_rgb_enc_trainable = sum(p.numel() for p in model_without_ddp.transformer.encoder.parameters() if p.requires_grad)
+    print(f"RGB Encoder: {n_rgb_enc:,} params, {n_rgb_enc_trainable:,} trainable")
+    
+    # Depth Encoder
+    n_depth_enc = sum(p.numel() for p in model_without_ddp.transformer.encoder_depth.parameters())
+    n_depth_enc_trainable = sum(p.numel() for p in model_without_ddp.transformer.encoder_depth.parameters() if p.requires_grad)
+    print(f"Depth Encoder: {n_depth_enc:,} params, {n_depth_enc_trainable:,} trainable")
+    
+    # Decoder
+    n_dec = sum(p.numel() for p in model_without_ddp.transformer.decoder.parameters())
+    n_dec_trainable = sum(p.numel() for p in model_without_ddp.transformer.decoder.parameters() if p.requires_grad)
+    print(f"Decoder: {n_dec:,} params, {n_dec_trainable:,} trainable")
+    
+    # Fusion MLP
+    n_fusion = sum(p.numel() for p in model_without_ddp.transformer.fusion_mlp.parameters())
+    n_fusion_trainable = sum(p.numel() for p in model_without_ddp.transformer.fusion_mlp.parameters() if p.requires_grad)
+    print(f"Fusion MLP: {n_fusion:,} params, {n_fusion_trainable:,} trainable")
+    
+    print("="*80 + "\n")
