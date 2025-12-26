@@ -12,16 +12,16 @@ class Transformer_RGBD(nn.Module):
                  return_intermediate_dec=False):
         super().__init__()
 
-        encoder_layer = TransformerEncoderLayer_RGBD(d_model, nhead, dim_feedforward,
+        encoder_layer = EncoderLayer_RGBD(d_model, nhead, dim_feedforward,
                                                 dropout, activation, normalize_before)
         encoder_norm = nn.LayerNorm(d_model) if normalize_before else None
-        self.encoder = TransformerEncoder(encoder_layer, num_encoder_layers, encoder_norm)
+        self.encoder = TransformerEncoder_RGBD(encoder_layer, num_encoder_layers, encoder_norm)
 
         ## changes here
-        encoder_layer_depth = TransformerEncoderLayer(d_model, nhead, dim_feedforward,
+        encoder_layer_depth = EncoderLayer_RGBD(d_model, nhead, dim_feedforward,
                                                 dropout, activation, normalize_before)
         encoder_norm_depth = nn.LayerNorm(d_model) if normalize_before else None
-        self.encoder_depth = TransformerEncoder(encoder_layer_depth, num_encoder_layers, encoder_norm_depth)
+        self.encoder_depth = TransformerEncoder_RGBD(encoder_layer_depth, num_encoder_layers, encoder_norm_depth)
 
         ## changes here
         # self.fusion_mlp = nn.Sequential(
@@ -142,9 +142,7 @@ class EncoderLayer_RGBD(nn.Module):
         q = k = self.with_pos_embed(src, pos)
         q_depth = k_depth = self.with_pos_embed(src_depth, pos)
 
-        src2 = self.self_attn(q, k, value=src, attn_mask=src_mask,
-                              key_padding_mask=src_key_padding_mask)[0]
-        src2_depth = self.self_attn(q_depth, k_depth, value=src_depth, attn_mask=src_mask,
+        src2, src2_depth = self.self_attn(q, k, value=src, attn_mask=src_mask,
                               key_padding_mask=src_key_padding_mask)[0]
         
         src = src + self.dropout1(src2)
@@ -175,7 +173,162 @@ class EncoderLayer_RGBD(nn.Module):
         if self.normalize_before:
             return self.forward_pre(src, src_mask, src_key_padding_mask, pos)
         return self.forward_post(src, src_mask, src_key_padding_mask, pos)
+    
+class RGBD_MultiHeadAttention(nn.Module):
 
+    def __init__(self, config):
+        super().__init__()
+        self.hidden_size = config["hidden_size"]
+        self.num_attention_heads = config["num_attention_heads"]
+        # The attention head size is the hidden size divided by the number of attention heads
+        self.attention_head_size = self.hidden_size // self.num_attention_heads
+        self.all_head_size = self.num_attention_heads * self.attention_head_size
+        # Whether or not to use bias in the query, key, and value projection layers
+        self.qkv_bias = config["qkv_bias"]
+        # Create a linear layer to project the query, key, and value
+        self.qkv_projection = nn.Linear(
+            self.hidden_size, self.all_head_size * 3, bias=self.qkv_bias
+        )
+        self.attn_dropout = nn.Dropout(config["attention_probs_dropout_prob"])
+        # Create a linear layer to project the attention output back to the hidden size
+        # In most cases, all_head_size and hidden_size are the same
+        self.output_projection = nn.Linear(self.all_head_size, self.hidden_size)
+        self.output_dropout = nn.Dropout(config["hidden_dropout_prob"])
+        self.alpha = config["alpha"]
+        self.beta = config["beta"]
+
+        self.learnable_alpha_beta = bool(config.get("learnable_alpha_beta", False))
+        if self.learnable_alpha_beta:
+            self.alpha_raw = nn.Parameter(torch.tensor(0.0))
+            self.beta_raw = nn.Parameter(torch.tensor(0.0))
+        else:
+            self.alpha_raw = None
+            self.beta_raw = None
+    
+    def get_alpha_beta(self):
+        """Sigmoid関数で0-1の範囲に制約"""
+        alpha_raw = torch.sigmoid(self.alpha_raw)
+        beta_raw = torch.sigmoid(self.beta_raw)
+        return alpha_raw, beta_raw
+
+    def forward(self, img, dpt, output_attentions=False):
+        # Project the query, key, and value
+        # (batch_size, sequence_length, hidden_size) -> (batch_size, sequence_length, all_head_size * 3)
+        qkv_img = self.qkv_projection(img)
+        qkv_dpt = self.qkv_projection(dpt)
+
+        # Split the projected query, key, and value into query, key, and value
+        # (batch_size, sequence_length, all_head_size * 3) -> (batch_size, sequence_length, all_head_size)
+        query_img, key_img, value_img = torch.chunk(qkv_img, 3, dim=-1)
+        query_dpt, key_dpt, value_dpt = torch.chunk(qkv_dpt, 3, dim=-1)
+
+        # Resize the query, key, and value to (batch_size, num_attention_heads, sequence_length, attention_head_size)
+        batch_size, sequence_length, _ = query_img.size()
+        query_img = query_img.view(
+            batch_size,
+            sequence_length,
+            self.num_attention_heads,
+            self.attention_head_size,
+        ).transpose(1, 2)
+        key_img = key_img.view(
+            batch_size,
+            sequence_length,
+            self.num_attention_heads,
+            self.attention_head_size,
+        ).transpose(1, 2)
+        value_img = value_img.view(
+            batch_size,
+            sequence_length,
+            self.num_attention_heads,
+            self.attention_head_size,
+        ).transpose(1, 2)
+
+        # Calculate the attention scores
+        attention_scores_img = torch.matmul(query_img, key_img.transpose(-1, -2))
+        attention_scores_img = attention_scores_img / math.sqrt(self.attention_head_size)
+
+        batch_size, sequence_length, _ = query_dpt.size()
+        query_dpt = query_dpt.view(
+            batch_size,
+            sequence_length,
+            self.num_attention_heads,
+            self.attention_head_size,
+        ).transpose(1, 2)
+        key_dpt = key_dpt.view(
+            batch_size,
+            sequence_length,
+            self.num_attention_heads,
+            self.attention_head_size,
+        ).transpose(1, 2)
+        value_dpt = value_dpt.view(
+            batch_size,
+            sequence_length,
+            self.num_attention_heads,
+            self.attention_head_size,
+        ).transpose(1, 2)
+
+        # Calculate the attention scores
+        attention_scores_dpt = torch.matmul(query_dpt, key_dpt.transpose(-1, -2))
+        attention_scores_dpt = attention_scores_dpt / math.sqrt(self.attention_head_size)
+
+        # Softmax
+        attention_probs_img = nn.functional.softmax(attention_scores_img, dim=-1)
+        attention_probs_img = self.attn_dropout(attention_probs_img)
+
+        attention_probs_dpt = nn.functional.softmax(attention_scores_dpt, dim=-1)
+        attention_probs_dpt = self.attn_dropout(attention_probs_dpt)
+
+        if not self.learnable_alpha_beta:
+            ## Share-Fusion (probs is how atteentioned to each other)
+            shared_attention_probs_img = (1-self.alpha)*attention_probs_img + self.alpha*attention_probs_dpt
+            shared_attention_probs_dpt = (1-self.beta)*attention_probs_dpt + self.beta*attention_probs_img
+
+        else:
+            ## Share-Fusion ++
+            
+            alpha_raw, beta_raw = self.get_alpha_beta()
+            shared_attention_probs_img = (1-alpha_raw)*attention_probs_img + alpha_raw*attention_probs_dpt
+            shared_attention_probs_dpt = (1-beta_raw)*attention_probs_dpt + beta_raw*attention_probs_img
+
+        # print(f"shared_attention_probs_img :{torch.sum(shared_attention_probs_img, dim=-1)}")
+        # print(f"shared_attention_probs_dpt :{torch.sum(shared_attention_probs_dpt, dim=-1)}")
+
+        # Calculate the attention output
+        attention_output_img = torch.matmul(shared_attention_probs_img, value_img)
+        # Resize the attention output
+        # from (batch_size, num_attention_heads, sequence_length, attention_head_size)
+        # To (batch_size, sequence_length, all_head_size)
+        attention_output_img = (
+            attention_output_img.transpose(1, 2)
+            .contiguous()
+            .view(batch_size, sequence_length, self.all_head_size)
+        )
+
+        # Calculate the attention output
+        attention_output_dpt = torch.matmul(shared_attention_probs_dpt, value_dpt)
+        attention_output_dpt = (
+            attention_output_dpt.transpose(1, 2)
+            .contiguous()
+            .view(batch_size, sequence_length, self.all_head_size)
+        )
+
+        # print(f"attention_output:{attention_output.shape}")
+        # Project the attention output back to the hidden size
+        attention_output_img = self.output_projection(attention_output_img)
+        attention_output_img = self.output_dropout(attention_output_img)
+
+        # print(f"attention_output:{attention_output.shape}")
+        # Project the attention output back to the hidden size
+        attention_output_dpt = self.output_projection(attention_output_dpt)
+        attention_output_dpt = self.output_dropout(attention_output_dpt)
+
+        # Return the attention output and the attention probabilities (optional)
+        if not output_attentions:
+            return (attention_output_img, None, attention_output_dpt, None)
+        else:
+            # print(f"attention_probs.shape:{attention_probs_img.shape}")
+            return (attention_output_img, shared_attention_probs_img, attention_output_dpt, shared_attention_probs_dpt)
+        
 def _get_clones(module, N):
     import copy
     return nn.ModuleList([copy.deepcopy(module) for i in range(N)])
