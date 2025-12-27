@@ -214,18 +214,8 @@ def main(args):
         ## changes here
         {
             "params": [p for n, p in model_without_ddp.named_parameters() 
-                      if "encoder_depth" in n and p.requires_grad],
-            "lr": args.lr * 1.0,  # Depth Encoder: 通常学習率（新規パラメータ）
-        },
-        # {
-        #     "params": [p for n, p in model_without_ddp.named_parameters() 
-        #               if "fusion_mlp" in n and p.requires_grad],
-        #     "lr": args.lr * 1.0,  # Fusion MLP: 通常学習率（新規パラメータ）
-        # },
-        {
-            "params": [p for n, p in model_without_ddp.named_parameters() 
-                      if "input_proj_depth" in n and p.requires_grad],
-            "lr": args.lr * 1.0, # input_proj_depth: 通常学習率（新規パラメータ）
+                      if "_depth" in n and p.requires_grad],
+            "lr": args.lr * 1.0,  
         },
     ]
     optimizer = torch.optim.AdamW(param_dicts, lr=args.lr,
@@ -284,9 +274,39 @@ def main(args):
                 print(f"  ... and {len(missing_keys) - 3} more")
 
         if args.use_depth:
-            print("\nCopying RGB Encoder weights to Depth Encoder...")
-            rgb_encoder_state = model_without_ddp.transformer.encoder.state_dict()
-            model_without_ddp.transformer.encoder_depth.load_state_dict(rgb_encoder_state)
+            print("\nCopying RGB Encoder weights to Depth Encoder layers")
+            encoder = model_without_ddp.transformer.encoder
+            for layer in encoder.layers:
+                # Linear層のコピー
+                layer.linear1_depth.weight.data.copy_(layer.linear1.weight.data)
+                layer.linear1_depth.bias.data.copy_(layer.linear1.bias.data)
+                layer.linear2_depth.weight.data.copy_(layer.linear2.weight.data)
+                layer.linear2_depth.bias.data.copy_(layer.linear2.bias.data)
+                
+                # Norm層のコピー
+                layer.norm1_depth.weight.data.copy_(layer.norm1.weight.data)
+                layer.norm1_depth.bias.data.copy_(layer.norm1.bias.data)
+                layer.norm2_depth.weight.data.copy_(layer.norm2.weight.data)
+                layer.norm2_depth.bias.data.copy_(layer.norm2.bias.data)
+
+                # Attention層内部のコピー (q_proj -> q_proj_depth 等)
+                attn = layer.self_attn
+                attn.q_proj_depth.weight.data.copy_(attn.q_proj.weight.data)
+                attn.q_proj_depth.bias.data.copy_(attn.q_proj.bias.data)
+                attn.k_proj_depth.weight.data.copy_(attn.k_proj.weight.data)
+                attn.k_proj_depth.bias.data.copy_(attn.k_proj.bias.data)
+                attn.v_proj_depth.weight.data.copy_(attn.v_proj.weight.data)
+                attn.v_proj_depth.bias.data.copy_(attn.v_proj.bias.data)
+                attn.out_proj_depth.weight.data.copy_(attn.out_proj.weight.data)
+                attn.out_proj_depth.bias.data.copy_(attn.out_proj.bias.data)
+
+            # Encoder全体のNormがあればコピー
+            if encoder.norm is not None:
+                 encoder.norm_depth.weight.data.copy_(encoder.norm.weight.data)
+                 encoder.norm_depth.bias.data.copy_(encoder.norm.bias.data)
+            
+            # rgb_encoder_state = model_without_ddp.transformer.encoder.state_dict()   
+            # model_without_ddp.transformer.encoder_depth.load_state_dict(rgb_encoder_state)
             print("Depth Encoder initialized with RGB Encoder weights!")
             
             # RGB Encoderを固定

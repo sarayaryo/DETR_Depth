@@ -16,6 +16,7 @@ from .matcher import build_matcher
 from .segmentation import (DETRsegm, PostProcessPanoptic, PostProcessSegm,
                            dice_loss, sigmoid_focal_loss)
 from .transformer import build_transformer
+from .sharefusion import build_transformer_RGBD  ## changes here
 
 
 class DETR(nn.Module):
@@ -349,7 +350,10 @@ def build(args):
 
     backbone = build_backbone(args)
 
-    transformer = build_transformer(args)
+    if args.use_sharefusion:
+        transformer = build_transformer_RGBD(args)  ## changes here
+    else:
+        transformer = build_transformer(args)
 
     model = DETR(
         backbone,
