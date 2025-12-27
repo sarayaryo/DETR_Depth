@@ -3,7 +3,7 @@ import torch
 import torch.nn.functional as F
 from torch import nn, Tensor
 from typing import Optional, List
-from detr.models.transformer import TransformerDecoder, TransformerDecoderLayer
+from models.transformer import TransformerDecoder, TransformerDecoderLayer
 
 class Transformer_RGBD(nn.Module):
 
@@ -166,7 +166,7 @@ class EncoderLayer_RGBD(nn.Module):
         q = k = self.with_pos_embed(src2, pos)        
         # Depth Stream
         src_depth2 = self.norm1_depth(src_depth)
-        q_depth = k_depth = self.with_pos_embed(src_depth2, pos)        
+        q_depth = k_depth = self.with_pos_embed(src_depth2, pos_depth)        
         # RGBD Attention
         src2, src_depth2, _, _ = self.self_attn(
             q, k, src2, 
@@ -192,10 +192,11 @@ class EncoderLayer_RGBD(nn.Module):
     def forward(self, src, src_depth,
                 src_mask: Optional[Tensor] = None,
                 src_key_padding_mask: Optional[Tensor] = None,
-                pos: Optional[Tensor] = None):
+                pos: Optional[Tensor] = None,
+                pos_depth: Optional[Tensor] = None):
         if self.normalize_before:
-            return self.forward_pre(src, src_depth, src_mask, src_key_padding_mask, pos)
-        return self.forward_post(src, src_depth, src_mask, src_key_padding_mask, pos)
+            return self.forward_pre(src, src_depth, src_mask, src_key_padding_mask, pos, pos_depth)
+        return self.forward_post(src, src_depth, src_mask, src_key_padding_mask, pos, pos_depth)
 
 
 class RGBD_MultiHeadAttention(nn.Module):

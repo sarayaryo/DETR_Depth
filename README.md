@@ -11,3 +11,6 @@ python main.py --coco_path "S:/coco/coco2017" --depth_path "S:/coco/coco2017_dep
 
 ### サーバー上で動かすとき(/workspace/DETR, coco想定)
 python DETR/detr/main.py --coco_path "/workspace/coco" --depth_path "/workspace/coco/coco2017_depth" --use_depth --resume "/workspace/DETR/weights/detr-r50-e632da11.pth" --output_dir outputs/depth-30_bs-8 --epochs 30 --lr 1e-4 --lr_backbone 1e-5 --batch_size 4 --num_workers 0  --val_split
+
+### sharefusion
+--use_sharefusion True

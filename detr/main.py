@@ -166,6 +166,8 @@ def get_args_parser():
                         help='use split validation set (train: 4000, test: 1000)')
     parser.add_argument('--patience', default=3, type=int,
                         help='Early stopping patience (epochs)')
+    parser.add_argument('--use_sharefusion', default='False', type=bool,
+                        help='Use ShareFusion architecture for RGB-D fusion')
 
     return parser
 
@@ -201,7 +203,7 @@ def main(args):
     param_dicts = [
         {"params": [p for n, p in model_without_ddp.named_parameters() 
                        if "backbone" not in n 
-                       and "encoder_depth" not in n 
+                       and "_depth" not in n 
                     #    and "fusion_mlp" not in n 
                        and "input_proj" not in n  # input_proj系はここで除外
                        and p.requires_grad],
@@ -218,8 +220,7 @@ def main(args):
             "lr": args.lr * 1.0,  
         },
     ]
-    optimizer = torch.optim.AdamW(param_dicts, lr=args.lr,
-                                  weight_decay=args.weight_decay)
+    optimizer = torch.optim.AdamW(param_dicts, lr=args.lr, weight_decay=args.weight_decay)
     lr_scheduler = torch.optim.lr_scheduler.StepLR(optimizer, args.lr_drop)
 
     dataset_train = build_dataset(image_set='train', args=args)
@@ -277,19 +278,19 @@ def main(args):
             print("\nCopying RGB Encoder weights to Depth Encoder layers")
             encoder = model_without_ddp.transformer.encoder
             for layer in encoder.layers:
-                # Linear層のコピー
+                # Linear
                 layer.linear1_depth.weight.data.copy_(layer.linear1.weight.data)
                 layer.linear1_depth.bias.data.copy_(layer.linear1.bias.data)
                 layer.linear2_depth.weight.data.copy_(layer.linear2.weight.data)
                 layer.linear2_depth.bias.data.copy_(layer.linear2.bias.data)
                 
-                # Norm層のコピー
+                # Norm
                 layer.norm1_depth.weight.data.copy_(layer.norm1.weight.data)
                 layer.norm1_depth.bias.data.copy_(layer.norm1.bias.data)
                 layer.norm2_depth.weight.data.copy_(layer.norm2.weight.data)
                 layer.norm2_depth.bias.data.copy_(layer.norm2.bias.data)
 
-                # Attention層内部のコピー (q_proj -> q_proj_depth 等)
+                # Attention Layer
                 attn = layer.self_attn
                 attn.q_proj_depth.weight.data.copy_(attn.q_proj.weight.data)
                 attn.q_proj_depth.bias.data.copy_(attn.q_proj.bias.data)
@@ -317,6 +318,7 @@ def main(args):
             for param in model_without_ddp.transformer.decoder.parameters():
                 param.requires_grad = False
             print("RGB input_proj, Encoder, Decoder parameters frozen!")
+            # print(model)
             print_parameter_status(model_without_ddp)
 
         # model_without_ddp.load_state_dict(checkpoint['model'])
