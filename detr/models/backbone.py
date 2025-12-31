@@ -128,10 +128,10 @@ def print_parameter_status(model_without_ddp):
     n_rgb_enc_trainable = sum(p.numel() for p in model_without_ddp.transformer.encoder.parameters() if p.requires_grad)
     print(f"RGB Encoder: {n_rgb_enc:,} params, {n_rgb_enc_trainable:,} trainable")
     
-    # Depth Encoder
-    n_depth_enc = sum(p.numel() for p in model_without_ddp.transformer.encoder_depth.parameters())
-    n_depth_enc_trainable = sum(p.numel() for p in model_without_ddp.transformer.encoder_depth.parameters() if p.requires_grad)
-    print(f"Depth Encoder: {n_depth_enc:,} params, {n_depth_enc_trainable:,} trainable")
+    # # Depth Encoder
+    # n_depth_enc = sum(p.numel() for p in model_without_ddp.transformer.encoder_depth.parameters())
+    # n_depth_enc_trainable = sum(p.numel() for p in model_without_ddp.transformer.encoder_depth.parameters() if p.requires_grad)
+    # print(f"Depth Encoder: {n_depth_enc:,} params, {n_depth_enc_trainable:,} trainable")
     
     # Decoder
     n_dec = sum(p.numel() for p in model_without_ddp.transformer.decoder.parameters())
