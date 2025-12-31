@@ -201,9 +201,8 @@ def main(args):
     param_dicts = [
         {"params": [p for n, p in model_without_ddp.named_parameters() 
                        if "backbone" not in n 
-                       and "encoder_depth" not in n 
-                    #    and "fusion_mlp" not in n 
-                       and "input_proj" not in n  # input_proj系はここで除外
+                       and "_depth" not in n 
+                       and "input_proj" not in n
                        and p.requires_grad],
         "lr": args.lr
         },
@@ -214,8 +213,8 @@ def main(args):
         ## changes here
         {
             "params": [p for n, p in model_without_ddp.named_parameters() 
-                      if "_depth" in n and p.requires_grad],
-            "lr": args.lr * 1.0,  
+                    if ("_depth" in n or "input_proj_depth" in n) and p.requires_grad],
+            "lr": args.lr * 1.0,
         },
     ]
     optimizer = torch.optim.AdamW(param_dicts, lr=args.lr,
