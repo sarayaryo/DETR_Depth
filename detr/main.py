@@ -5,12 +5,16 @@ import json
 import random
 import time
 from pathlib import Path
+import warnings
+# torchvisionのpretrainedに関する警告を無視
+warnings.filterwarnings("ignore", category=UserWarning, module="torchvision.models._utils")
 
 import numpy as np
 import torch
 from torch.utils.data import DataLoader, DistributedSampler
 
 import datasets
+from module import print_detailed_param_status, print_simplified_param_status
 import util.misc as utils
 from datasets import build_dataset, get_coco_api_from_dataset
 from engine import evaluate, train_one_epoch
@@ -263,7 +267,7 @@ def main(args):
             checkpoint = torch.hub.load_state_dict_from_url(
                 args.resume, map_location='cpu', check_hash=True)
         else:
-            checkpoint = torch.load(args.resume, map_location='cpu')
+            checkpoint = torch.load(args.resume, map_location='cpu', weights_only=False)
         ## changes here - strict=Falseでロード
         missing_keys, unexpected_keys = model_without_ddp.load_state_dict(checkpoint['model'], strict=False)
         print("Loading pretrained weights...")
@@ -311,14 +315,28 @@ def main(args):
             print("Depth Encoder initialized with RGB Encoder weights!")
             
             # RGB Encoderを固定
+            # 1. Input Projection (RGB) -> 固定
             for param in model_without_ddp.input_proj.parameters():
                 param.requires_grad = False
-            for param in model_without_ddp.transformer.encoder.parameters():
+                
+            # 2. Backbone (ResNet) -> 固定
+            for param in model_without_ddp.backbone.parameters():
                 param.requires_grad = False
+                
+            # 3. Decoder -> 固定 (今回は固定する方針)
             for param in model_without_ddp.transformer.decoder.parameters():
                 param.requires_grad = False
+
+            # 4. Encoder -> 「_depth」だけ学習、「RGB」は固定
+            for name, param in model_without_ddp.transformer.encoder.named_parameters():
+                if "_depth" in name:
+                    param.requires_grad = True  # Depthは学習する
+                else:
+                    param.requires_grad = False # RGBは固定する
+
             print("RGB input_proj, Encoder, Decoder parameters frozen!")
             # print(model)
+            print_simplified_param_status(model_without_ddp)
             print_parameter_status(model_without_ddp)
 
         # model_without_ddp.load_state_dict(checkpoint['model'])
