@@ -10,11 +10,11 @@ class Transformer_RGBD(nn.Module):
     def __init__(self, d_model=512, nhead=8, num_encoder_layers=6,
                  num_decoder_layers=6, dim_feedforward=2048, dropout=0.1,
                  activation="relu", normalize_before=False,
-                 return_intermediate_dec=False):
+                 return_intermediate_dec=False, args=None):
         super().__init__()
 
         encoder_layer = EncoderLayer_RGBD(d_model, nhead, dim_feedforward,
-                                                dropout, activation, normalize_before)
+                                                dropout, activation, normalize_before, args=args)
         encoder_norm = nn.LayerNorm(d_model) if normalize_before else None
         self.encoder = TransformerEncoder_RGBD(encoder_layer, num_encoder_layers, encoder_norm)
 
@@ -99,9 +99,9 @@ class TransformerEncoder_RGBD(nn.Module):
 class EncoderLayer_RGBD(nn.Module):
 
     def __init__(self, d_model, nhead, dim_feedforward=2048, dropout=0.1,
-                 activation="relu", normalize_before=False):
+                 activation="relu", normalize_before=False, args=None):
         super().__init__()
-        self.self_attn = RGBD_MultiHeadAttention(d_model, nhead, dropout=dropout)
+        self.self_attn = RGBD_MultiHeadAttention(d_model, nhead, dropout=dropout, args=args)
         # Implementation of Feedforward model
         self.linear1 = nn.Linear(d_model, dim_feedforward)
         self.dropout = nn.Dropout(dropout)
@@ -319,10 +319,8 @@ class EncoderLayer_RGBD(nn.Module):
     
 
 class RGBD_MultiHeadAttention(nn.Module):
-    def __init__(self, embed_dim, num_heads, dropout=0.0, bias=True):
+    def __init__(self, embed_dim, num_heads, dropout=0.0, bias=True, args=None):
         super().__init__()
-        # 標準のMultiheadAttentionを2つ保持する（重みの名前を維持するため）
-        # ただし、forward計算は自前で行うため、これらを直接呼び出すわけではない
         self.rgb_attn = nn.MultiheadAttention(embed_dim, num_heads, dropout=dropout, bias=bias)
         self.depth_attn = nn.MultiheadAttention(embed_dim, num_heads, dropout=dropout, bias=bias)
         
@@ -332,9 +330,12 @@ class RGBD_MultiHeadAttention(nn.Module):
         assert self.head_dim * num_heads == self.embed_dim
 
         # Fusionパラメータ
-        self.alpha = 0.5
-        self.beta = 0.5
-
+        if args.use_learnable_param:
+            self.alpha = nn.Parameter(torch.tensor(0.0))
+            self.beta = nn.Parameter(torch.tensor(0.0))
+        else:
+            self.alpha = 0.0
+            self.beta = 0.0
     
     def forward(
         self,
@@ -395,39 +396,40 @@ class RGBD_MultiHeadAttention(nn.Module):
         return output_rgb, output_dpt, shared_probs_rgb, shared_probs_dpt
 
     def _project_qkv(self, q, k, v, attn_layer):
-        # 標準MultiheadAttentionの重み (in_proj_weight) は [3 * dim, dim] の形状
-        # これを分割して使う
-        
-        # 入力の形式を統一 (Len, Batch, Dim) -> (Batch, Len, Dim)
-        # ※ DETRは (Len, Batch, Dim) で来るので転置が必要
-        tgt_len, bsz, embed_dim = q.shape
-        q = q.transpose(0, 1) # (Batch, Len, Dim)
-        k = k.transpose(0, 1)
-        v = v.transpose(0, 1)
+            """
+            修正版: Q, K, V が異なる場合（DETR Encoderは V != Q）に対応
+            """
+            # (Len, Batch, Dim) -> (Batch, Len, Dim)
+            tgt_len, bsz, embed_dim = q.shape
+            q = q.transpose(0, 1)
+            k = k.transpose(0, 1)
+            v = v.transpose(0, 1)
 
-        # in_proj_weight がある場合（まとめて計算）
-        if hasattr(attn_layer, 'in_proj_weight') and attn_layer.in_proj_weight is not None:
-            # Q, K, V を一度に計算したほうが速い
-            # (Batch, Len, Dim) -> (Batch, Len, 3*Dim)
-            if k is v: # Self-Attention (src==src)
-                 chunk = F.linear(q, attn_layer.in_proj_weight, attn_layer.in_proj_bias)
-            else: # Cross-Attention (今回はEncoderなのでSelfのみ想定でOK)
-                 # 個別に計算が必要だが、EncoderLayer_RGBDの呼び出し元を見ると q=k=v なのでOK
-                 chunk = F.linear(q, attn_layer.in_proj_weight, attn_layer.in_proj_bias)
+            # in_proj_weight (3*Dim, Dim) を持っている場合
+            if hasattr(attn_layer, 'in_proj_weight') and attn_layer.in_proj_weight is not None:
+                # 重みとバイアスを3等分する (Q用, K用, V用)
+                w_q, w_k, w_v = attn_layer.in_proj_weight.chunk(3, dim=0)
+                b_q, b_k, b_v = attn_layer.in_proj_bias.chunk(3, dim=0)
+                
+                # それぞれ個別に射影する
+                # ※ DETRでは q=k=(src+pos), v=src なので、qとvが違う！
+                q_proj = F.linear(q, w_q, b_q)
+                k_proj = F.linear(k, w_k, b_k)
+                v_proj = F.linear(v, w_v, b_v)
+                
+            else:
+                # 互換性のため（q_proj_weightなどが分かれている場合）
+                q_proj = F.linear(q, attn_layer.q_proj_weight, attn_layer.q_proj_bias)
+                k_proj = F.linear(k, attn_layer.k_proj_weight, attn_layer.k_proj_bias)
+                v_proj = F.linear(v, attn_layer.v_proj_weight, attn_layer.v_proj_bias)
+
+            # Head分割 & Transpose
+            # (Batch, Len, Dim) -> (Batch, Len, Heads, HeadDim) -> (Batch, Heads, Len, HeadDim)
+            q_proj = q_proj.view(bsz, tgt_len, self.num_heads, self.head_dim).transpose(1, 2)
+            k_proj = k_proj.view(bsz, -1, self.num_heads, self.head_dim).transpose(1, 2)
+            v_proj = v_proj.view(bsz, -1, self.num_heads, self.head_dim).transpose(1, 2)
             
-            q_proj, k_proj, v_proj = chunk.chunk(3, dim=-1)
-        else:
-            # もしq_proj_weightなどが別れている場合（PyTorchバージョンによる）
-            q_proj = F.linear(q, attn_layer.q_proj_weight, attn_layer.q_proj_bias)
-            k_proj = F.linear(k, attn_layer.k_proj_weight, attn_layer.k_proj_bias)
-            v_proj = F.linear(v, attn_layer.v_proj_weight, attn_layer.v_proj_bias)
-
-        # Head分割: (Batch, Len, Dim) -> (Batch, Len, Heads, HeadDim) -> (Batch, Heads, Len, HeadDim)
-        q_proj = q_proj.view(bsz, tgt_len, self.num_heads, self.head_dim).transpose(1, 2)
-        k_proj = k_proj.view(bsz, -1, self.num_heads, self.head_dim).transpose(1, 2)
-        v_proj = v_proj.view(bsz, -1, self.num_heads, self.head_dim).transpose(1, 2)
-        
-        return q_proj, k_proj, v_proj
+            return q_proj, k_proj, v_proj
 
     def _concat_projection(self, output, attn_layer):
         # (Batch, Heads, Len, HeadDim) -> (Batch, Len, Heads, HeadDim) -> (Batch, Len, Dim)
@@ -456,6 +458,7 @@ def build_transformer_RGBD(args):
         num_decoder_layers=args.dec_layers,
         normalize_before=args.pre_norm,
         return_intermediate_dec=True,
+        args=args
     )
 
 

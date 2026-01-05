@@ -16,7 +16,7 @@ import torch
 from torch.utils.data import DataLoader, DistributedSampler
 
 import datasets
-from module import print_detailed_param_status, print_simplified_param_status, TerminalLogger
+from custom_module import print_detailed_param_status, print_simplified_param_status, TerminalLogger
 import util.misc as utils
 from datasets import build_dataset, get_coco_api_from_dataset
 from engine import evaluate, train_one_epoch
@@ -172,8 +172,10 @@ def get_args_parser():
                         help='use split validation set (train: 4000, test: 1000)')
     parser.add_argument('--patience', default=5, type=int,
                         help='Early stopping patience (epochs)')
-    parser.add_argument('--use_sharefusion', default='False', type=bool,
+    parser.add_argument('--use_sharefusion', action='store_true',
                         help='Use ShareFusion architecture for RGB-D fusion')
+    parser.add_argument('--use_learnable_param', action='store_true',
+                        help='Use learnable fusion weights in ShareFusion modules')
 
     return parser
 
@@ -186,7 +188,6 @@ def main(args):
 
     if args.frozen_weights is not None:
         assert args.masks, "Frozen training is meant for segmentation only"
-    print(args)
 
     device = torch.device(args.device)
 
@@ -270,83 +271,146 @@ def main(args):
                 args.resume, map_location='cpu', check_hash=True)
         else:
             checkpoint = torch.load(args.resume, map_location='cpu', weights_only=False)
-        new_state_dict = {}
-        for k, v in checkpoint['model'].items():
-            if "encoder" in k and "self_attn" in k:
-                # RGB用として rgb_attn を挟む
-                new_key = k.replace("self_attn.", "self_attn.rgb_attn.")
-                new_state_dict[new_key] = v
-            else:
-                new_state_dict[k] = v
-        ## changes here - strict=Falseでロード
-        missing_keys, unexpected_keys = model_without_ddp.load_state_dict(new_state_dict, strict=False)
-        print("Loading pretrained weights...")
-        if missing_keys:
-            print(f"Missing keys (new parameters): {len(missing_keys)} keys")
-            for key in missing_keys[:3]:
-                print(f"  - {key}")
-            if len(missing_keys) > 3:
-                print(f"  ... and {len(missing_keys) - 3} more")
-
-        if args.use_depth:
-            print("\nCopying RGB Encoder weights to Depth Encoder layers")
-            encoder = model_without_ddp.transformer.encoder
-            for layer in encoder.layers:
-                # in_proj_weight (QKV)
-                layer.self_attn.depth_attn.in_proj_weight.data.copy_(
-                    layer.self_attn.rgb_attn.in_proj_weight.data
-                )
-                layer.self_attn.depth_attn.in_proj_bias.data.copy_(
-                    layer.self_attn.rgb_attn.in_proj_bias.data
-                )
-                # out_proj (Output)
-                layer.self_attn.depth_attn.out_proj.weight.data.copy_(
-                    layer.self_attn.rgb_attn.out_proj.weight.data
-                )
-                layer.self_attn.depth_attn.out_proj.bias.data.copy_(
-                    layer.self_attn.rgb_attn.out_proj.bias.data
-                )
-
-            # Encoder全体のNormがあればコピー
-            if encoder.norm is not None:
-                 encoder.norm_depth.weight.data.copy_(encoder.norm.weight.data)
-                 encoder.norm_depth.bias.data.copy_(encoder.norm.bias.data)
-            
-            # rgb_encoder_state = model_without_ddp.transformer.encoder.state_dict()   
-            # model_without_ddp.transformer.encoder_depth.load_state_dict(rgb_encoder_state)
-            print("Depth Encoder initialized with RGB Encoder weights!")
-            
-            # RGB Encoderを固定
-            # 1. Input Projection (RGB) -> 固定
-            for param in model_without_ddp.input_proj.parameters():
-                param.requires_grad = False
-                
-            # 2. Backbone (ResNet) -> 固定
-            for param in model_without_ddp.backbone.parameters():
-                param.requires_grad = False
-                
-            # 3. Decoder -> 学習
-            for param in model_without_ddp.transformer.decoder.parameters():
-                param.requires_grad = False
-
-            # 4. Encoder -> 「_depth」だけ学習、「RGB」は固定
-            for name, param in model_without_ddp.transformer.encoder.named_parameters():
-                if "_depth" in name:
-                    param.requires_grad = True  # Depthは学習する
-                else:
-                    param.requires_grad = False # RGBは固定する
-
-            print("RGB input_proj, Encoder, Decoder parameters frozen!")
-            # print(model)
-            print_simplified_param_status(model_without_ddp)
-            print_parameter_status(model_without_ddp)
-
         # model_without_ddp.load_state_dict(checkpoint['model'])
+
+        pretrained_dict = checkpoint['model']
+
+        if args.use_sharefusion:
+
+            model_dict = model_without_ddp.state_dict()
+            # ---------------------------------------------------------
+            # 状態辞書の整形 (Renaming)
+            #    Checkpointの "self_attn.xxx" を "self_attn.rgb_attn.xxx" に変換
+            # ---------------------------------------------------------
+            new_state_dict = {}
+            renamed_count = 0
+            for k, v in pretrained_dict.items():
+                # EncoderのSelf-Attention部分のみ変換対象
+                if "transformer.encoder.layers" in k and "self_attn" in k:
+                    # 例: ...self_attn.in_proj_weight -> ...self_attn.rgb_attn.in_proj_weight
+                    # ※ Decoderは構造を変えていないので変換してはいけない
+                    if "rgb_attn" not in k: # すでに変換済みでなければ
+                        new_key = k.replace("self_attn.", "self_attn.rgb_attn.")
+                        # print(k, "->", new_key)
+                        new_state_dict[new_key] = v
+                        renamed_count += 1
+                    else:
+                        new_state_dict[k] = v
+                else:
+                    # それ以外（Backbone, Decoder, Input_projなど）はそのまま
+                    new_state_dict[k] = v
+            print(f"Renamed {renamed_count} keys for RGB-Stream compatibility.")
+
+            # ---------------------------------------------------------
+            # 3. 重みのロード (RGBストリームの復元)
+            # ---------------------------------------------------------
+            # strict=False は必須 (Depth側の重みがまだ無いため)
+            missing, unexpected = model_without_ddp.load_state_dict(new_state_dict, strict=False)
+            
+            # 重要なログ確認: RGB側の主要パーツが "missing" になっていないか？
+            rgb_missing = [k for k in missing if "rgb_attn" in k or "backbone" in k]
+            if len(rgb_missing) > 0:
+                print("\n[WARNING] Some RGB weights were NOT loaded! Check these keys:")
+                for k in rgb_missing[:5]: print(f" - {k}")
+            else:
+                print(">>> RGB Stream weights loaded successfully.")
+
+            # ---------------------------------------------------------
+            # 4. Depthストリームの初期化 (Transfer Learning)
+            #    ロードされたばかりの rgb_attn の重みを depth_attn にコピー
+            # ---------------------------------------------------------
+            if args.use_depth:
+                print(">>> Initializing Depth Stream from RGB weights...")
+                
+                encoder = model_without_ddp.transformer.encoder
+                for i, layer in enumerate(encoder.layers):
+                    # Attentionのコピー (rgb_attn -> depth_attn)
+                    if hasattr(layer.self_attn, "rgb_attn") and hasattr(layer.self_attn, "depth_attn"):
+                        # in_proj_weight / bias
+                        if hasattr(layer.self_attn.rgb_attn, "in_proj_weight"):
+                            layer.self_attn.depth_attn.in_proj_weight.data.copy_(
+                                layer.self_attn.rgb_attn.in_proj_weight.data
+                            )
+                            layer.self_attn.depth_attn.in_proj_bias.data.copy_(
+                                layer.self_attn.rgb_attn.in_proj_bias.data
+                            )
+                        
+                        # out_proj.weight / bias
+                        layer.self_attn.depth_attn.out_proj.weight.data.copy_(
+                            layer.self_attn.rgb_attn.out_proj.weight.data
+                        )
+                        layer.self_attn.depth_attn.out_proj.bias.data.copy_(
+                            layer.self_attn.rgb_attn.out_proj.bias.data
+                        )
+                    
+                    # FFN (Feed Forward) のコピー (linear1, linear2 -> linear1_depth, linear2_depth)
+                    # ※ sharefusion.py の EncoderLayer_RGBD 定義に基づく
+                    layer.linear1_depth.weight.data.copy_(layer.linear1.weight.data)
+                    layer.linear1_depth.bias.data.copy_(layer.linear1.bias.data)
+                    layer.linear2_depth.weight.data.copy_(layer.linear2.weight.data)
+                    layer.linear2_depth.bias.data.copy_(layer.linear2.bias.data)
+
+                    # Norm Layers のコピー
+                    layer.norm1_depth.weight.data.copy_(layer.norm1.weight.data)
+                    layer.norm1_depth.bias.data.copy_(layer.norm1.bias.data)
+                    layer.norm2_depth.weight.data.copy_(layer.norm2.weight.data)
+                    layer.norm2_depth.bias.data.copy_(layer.norm2.bias.data)
+
+                # input_proj (CNN -> Transformerのつなぎ) のコピー
+                # ※ detr.py で定義されているはず
+                if hasattr(model_without_ddp, "input_proj_depth"):
+                    model_without_ddp.input_proj_depth.weight.data.copy_(
+                        model_without_ddp.input_proj.weight.data
+                    )
+                    model_without_ddp.input_proj_depth.bias.data.copy_(
+                        model_without_ddp.input_proj.bias.data
+                    )
+
+                print(">>> Depth Stream initialized.")
+                print("="*60 + "\n")
+
+        else:
+            print(">>> Mode: Standard DETR (Loading directly)")
+            # 名前変換なしでそのままロード
+            # strict=Falseにしておく（input_proj_depthなど余計なものがあるかもしれないため）
+            missing, unexpected = model_without_ddp.load_state_dict(pretrained_dict, strict=False)
+            
+            # 本来あるべきRGBの重みが消えてないかチェック
+            if len(missing) > 0:
+                print(f"    Missing keys: {len(missing)}")
+                # ここで 'self_attn' 系がMissingになっていなければ成功
+            else:
+                print(">>> All weights loaded successfully.")
         
-        if not args.eval and 'optimizer' in checkpoint and 'lr_scheduler' in checkpoint and 'epoch' in checkpoint:
-            optimizer.load_state_dict(checkpoint['optimizer'])
-            lr_scheduler.load_state_dict(checkpoint['lr_scheduler'])
-            args.start_epoch = checkpoint['epoch'] + 1
+
+        # パラメータを固定
+        for param in model_without_ddp.input_proj.parameters():
+            param.requires_grad = False
+        for param in model_without_ddp.backbone.parameters():
+            param.requires_grad = False
+        for param in model_without_ddp.transformer.decoder.parameters():
+            param.requires_grad = False
+        for name, param in model_without_ddp.transformer.encoder.named_parameters():
+            # Depth関連のキーワードが含まれているかチェック
+            is_depth_param = ("_depth" in name) or ("depth_attn" in name)
+            
+            if is_depth_param:
+                # Depth用 -> 学習 (Trainable)
+                param.requires_grad = True
+            else:
+                # RGB用 (linear1, norm1, rgb_attnなど) -> 固定 (Frozen)
+                param.requires_grad = False
+
+            
+
+    print_simplified_param_status(model_without_ddp)
+    print_parameter_status(model_without_ddp)
+
+        
+    if not args.eval and 'optimizer' in checkpoint and 'lr_scheduler' in checkpoint and 'epoch' in checkpoint:
+        optimizer.load_state_dict(checkpoint['optimizer'])
+        lr_scheduler.load_state_dict(checkpoint['lr_scheduler'])
+        args.start_epoch = checkpoint['epoch'] + 1
 
     if args.eval:
         test_stats, coco_evaluator = evaluate(model, criterion, postprocessors,
@@ -365,7 +429,7 @@ def main(args):
             sampler_train.set_epoch(epoch)
         train_stats = train_one_epoch(
             model, criterion, data_loader_train, optimizer, device, epoch,
-            args.clip_max_norm)
+            args.clip_max_norm)                                                                                                                 
         lr_scheduler.step()
         if args.output_dir:
             checkpoint_paths = [output_dir / 'checkpoint.pth']

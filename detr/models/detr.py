@@ -351,8 +351,10 @@ def build(args):
     backbone = build_backbone(args)
 
     if args.use_sharefusion:
+        print(">>> Building RGB-D Transformer with ShareFusion...")
         transformer = build_transformer_RGBD(args)  ## changes here
     else:
+        print(">>> Building standard Transformer (RGB only)...")
         transformer = build_transformer(args)
 
     model = DETR(

@@ -1,3 +1,4 @@
+
 def print_detailed_param_status(model):
     print("\n" + "="*90)
     print(f"{'Parameter Name':<60} | {'Status':<10} | {'Shape':<15}")
