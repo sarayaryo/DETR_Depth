@@ -311,66 +311,8 @@ class TransformerDecoderLayer(nn.Module):
         return self.forward_post(tgt, memory, tgt_mask, memory_mask,
                                  tgt_key_padding_mask, memory_key_padding_mask, pos, query_pos)
 
-class RGBDAttentionFusionLayer(nn.Module):
-    def __init__(self, d_model, nhead, alpha=0.5, beta=0.5):
-        super().__init__()
-        self.d_model = d_model
-        self.nhead = nhead
-        self.head_dim = d_model // nhead
-        
-        # learnable parameters for weighting
-        self.alpha = nn.Parameter(torch.tensor(alpha))
-        self.beta = nn.Parameter(torch.tensor(beta))
-        
-        # fixed parameters for weighting
-        # self.alpha = alpha
-        # self.beta = beta
 
-    def get_alpha_beta(self):
-        """Sigmoid 0-1"""
-        alpha_raw = torch.sigmoid(self.alpha)
-        beta_raw = torch.sigmoid(self.beta)
-        return alpha_raw, beta_raw
-    
-    def forward(self, rgb_features, depth_features, rgb_attn_map, depth_attn_map, pos=None):
-        """
-        Args:
-            rgb_features: (seq_len, batch, d_model)
-            depth_features: (seq_len, batch, d_model)
-            rgb_attn_map: (batch, seq_len, seq_len)
-            depth_attn_map: (batch, seq_len, seq_len)
-            pos: positional encoding
-        
-        Returns:
-            fused_features: (seq_len, batch, d_model)
-        """
-        seq_len, batch_size, _ = rgb_features.shape
-        
-        # Share-Fusion
-        alpha_raw, beta_raw = self.get_alpha_beta(self) 
 
-        shared_rgb_attn_map = (1-alpha_raw) * rgb_attn_map + alpha_raw * depth_attn_map
-        shared_depth_attn_map = (1-beta_raw) * depth_attn_map + beta_raw * rgb_attn_map
-        # (batch, seq_len, seq_len)
-        
-        # 融合したAttentionMapを使って特徴を再計算
-        # Value = RGB + Depth の平均（または加重平均）
-        fused_value = (rgb_features + depth_features) / 2.0
-        # (seq_len, batch, d_model)
-        
-        # AttentionMapを適用
-        # fused_attn_map: (batch, seq_len, seq_len)
-        # fused_value: (seq_len, batch, d_model) -> (batch, seq_len, d_model)
-        fused_value = fused_value.transpose(0, 1)  # (batch, seq_len, d_model)
-        
-        # Attention適用: (batch, seq_len, seq_len) @ (batch, seq_len, d_model)
-        fused_output = torch.bmm(fused_attn_map, fused_value)
-        # (batch, seq_len, d_model)
-        
-        # 元の形状に戻す
-        fused_output = fused_output.transpose(0, 1)  # (seq_len, batch, d_model)
-        
-        return fused_output
 
 
 def _get_clones(module, N):

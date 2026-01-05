@@ -18,3 +18,5 @@ experiment-*
 .mypy_cache/*
 not_tracked_dir/
 .vscode
+COCO_latefusion_old.zip
+*.zip

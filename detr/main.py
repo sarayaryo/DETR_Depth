@@ -270,8 +270,16 @@ def main(args):
                 args.resume, map_location='cpu', check_hash=True)
         else:
             checkpoint = torch.load(args.resume, map_location='cpu', weights_only=False)
+        new_state_dict = {}
+        for k, v in checkpoint['model'].items():
+            if "encoder" in k and "self_attn" in k:
+                # RGB用として rgb_attn を挟む
+                new_key = k.replace("self_attn.", "self_attn.rgb_attn.")
+                new_state_dict[new_key] = v
+            else:
+                new_state_dict[k] = v
         ## changes here - strict=Falseでロード
-        missing_keys, unexpected_keys = model_without_ddp.load_state_dict(checkpoint['model'], strict=False)
+        missing_keys, unexpected_keys = model_without_ddp.load_state_dict(new_state_dict, strict=False)
         print("Loading pretrained weights...")
         if missing_keys:
             print(f"Missing keys (new parameters): {len(missing_keys)} keys")
@@ -284,28 +292,20 @@ def main(args):
             print("\nCopying RGB Encoder weights to Depth Encoder layers")
             encoder = model_without_ddp.transformer.encoder
             for layer in encoder.layers:
-                # Linear
-                layer.linear1_depth.weight.data.copy_(layer.linear1.weight.data)
-                layer.linear1_depth.bias.data.copy_(layer.linear1.bias.data)
-                layer.linear2_depth.weight.data.copy_(layer.linear2.weight.data)
-                layer.linear2_depth.bias.data.copy_(layer.linear2.bias.data)
-                
-                # Norm
-                layer.norm1_depth.weight.data.copy_(layer.norm1.weight.data)
-                layer.norm1_depth.bias.data.copy_(layer.norm1.bias.data)
-                layer.norm2_depth.weight.data.copy_(layer.norm2.weight.data)
-                layer.norm2_depth.bias.data.copy_(layer.norm2.bias.data)
-
-                # Attention Layer
-                attn = layer.self_attn
-                attn.q_proj_depth.weight.data.copy_(attn.q_proj.weight.data)
-                attn.q_proj_depth.bias.data.copy_(attn.q_proj.bias.data)
-                attn.k_proj_depth.weight.data.copy_(attn.k_proj.weight.data)
-                attn.k_proj_depth.bias.data.copy_(attn.k_proj.bias.data)
-                attn.v_proj_depth.weight.data.copy_(attn.v_proj.weight.data)
-                attn.v_proj_depth.bias.data.copy_(attn.v_proj.bias.data)
-                attn.out_proj_depth.weight.data.copy_(attn.out_proj.weight.data)
-                attn.out_proj_depth.bias.data.copy_(attn.out_proj.bias.data)
+                # in_proj_weight (QKV)
+                layer.self_attn.depth_attn.in_proj_weight.data.copy_(
+                    layer.self_attn.rgb_attn.in_proj_weight.data
+                )
+                layer.self_attn.depth_attn.in_proj_bias.data.copy_(
+                    layer.self_attn.rgb_attn.in_proj_bias.data
+                )
+                # out_proj (Output)
+                layer.self_attn.depth_attn.out_proj.weight.data.copy_(
+                    layer.self_attn.rgb_attn.out_proj.weight.data
+                )
+                layer.self_attn.depth_attn.out_proj.bias.data.copy_(
+                    layer.self_attn.rgb_attn.out_proj.bias.data
+                )
 
             # Encoder全体のNormがあればコピー
             if encoder.norm is not None:
