@@ -44,7 +44,7 @@ class CocoDetection_Depth(torchvision.datasets.CocoDetection):
         target = {'image_id': image_id, 'annotations': target}
         img, target = self.prepare(img, target)
         
-        # ★Depth画像の読み込み
+        # Depth画像の読み込み
         depth_img = None
         if self.depth_folder is not None:
             # 画像ファイル名を取得
@@ -253,6 +253,7 @@ def build(image_set, args):
     
     if hasattr(args, 'debug') and args.debug:
         subset_size = min(100, len(dataset))
+        print(f"Debug mode: using subset of size {subset_size}")
         dataset = torch.utils.data.Subset(dataset, range(subset_size))
         
     return dataset

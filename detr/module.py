@@ -82,3 +82,19 @@ def print_simplified_param_status(model):
     print("-" * 80)
     print(f"Total Trainable Params: {total_trainable_params:,}")
     print("="*80 + "\n")
+
+class TerminalLogger(object):
+    def __init__(self, filename):
+        import sys
+        self.terminal = sys.stdout
+        self.log = open(filename, "a", encoding='utf-8') # 追記モード
+
+    def write(self, message):
+        self.terminal.write(message)
+        self.log.write(message)
+        self.log.flush() # すぐにファイルに書き込む
+
+    def flush(self):
+        # python 3 compatibility
+        self.terminal.flush()
+        self.log.flush()

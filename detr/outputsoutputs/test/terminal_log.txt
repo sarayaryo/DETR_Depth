@@ -1,0 +1,121 @@
+Logging to: DETR/detr/outputsoutputs/test/terminal_log.txt
+Not using distributed mode
+git:
+  sha: 7d48c92bc8ef72388cb8f6a592a48bab537105de, status: has uncommited changes, branch: main
+
+Namespace(lr=0.0001, lr_backbone=1e-05, batch_size=4, weight_decay=0.0001, epochs=50, lr_drop=200, clip_max_norm=0.1, frozen_weights=None, backbone='resnet50', dilation=False, position_embedding='sine', enc_layers=6, dec_layers=6, dim_feedforward=2048, hidden_dim=256, dropout=0.1, nheads=8, num_queries=100, pre_norm=False, masks=False, aux_loss=True, set_cost_class=1, set_cost_bbox=5, set_cost_giou=2, mask_loss_coef=1, dice_loss_coef=1, bbox_loss_coef=5, giou_loss_coef=2, eos_coef=0.1, dataset_file='coco', coco_path='/workspace/coco/coco2017', coco_panoptic_path=None, remove_difficult=False, output_dir='DETR/detr/outputsoutputs/test', device='cuda', seed=42, resume='/workspace/DETR/weights/detr-r50-e632da11.pth', start_epoch=0, eval=False, num_workers=8, world_size=1, dist_url='env://', lr_depth_encoder=0.0001, depth_path='/workspace/coco/coco2017_depth', use_depth=True, debug=True, val_split=True, patience=5, use_sharefusion=True, distributed=False)
+number of params: 49717344
+Using split validation dataset for train
+loading annotations into memory...
+Done (t=0.65s)
+creating index...
+index created!
+Using split validation dataset for val
+loading annotations into memory...
+Done (t=0.10s)
+creating index...
+index created!
+Loading pretrained weights...
+Missing keys (new parameters): 134 keys
+  - transformer.encoder.layers.0.self_attn.q_proj.weight
+  - transformer.encoder.layers.0.self_attn.q_proj.bias
+  - transformer.encoder.layers.0.self_attn.k_proj.weight
+  ... and 131 more
+
+Copying RGB Encoder weights to Depth Encoder layers
+Depth Encoder initialized with RGB Encoder weights!
+RGB input_proj, Encoder, Decoder parameters frozen!
+
+================================================================================
+Module Name                              | Status          | Details
+--------------------------------------------------------------------------------
+Backbone (ResNet)                        | [90mALL FROZEN[0m | 0 / 23,454,912 params
+Input Proj (RGB)                         | [90mALL FROZEN[0m | 0 / 524,544 params
+Input Proj (Depth)                       | [92mALL TRAINABLE[0m | 524,544 / 524,544 params
+Transformer Encoder                      | [93mPARTIAL[0m | 7,890,432 / 15,780,864 params
+Transformer Decoder                      | [92mALL TRAINABLE[0m | 9,473,024 / 9,473,024 params
+Class/BBox Head                          | [92mALL TRAINABLE[0m | 23,644 / 23,644 params
+--------------------------------------------------------------------------------
+Total Trainable Params: 17,911,644
+================================================================================
+
+
+================================================================================
+Parameter Status Check:
+================================================================================
+RGB Encoder: 15,780,864 params, 7,890,432 trainable
+Decoder: 9,473,024 params, 9,473,024 trainable
+================================================================================
+
+Start training
+Epoch: [0] Total time: 0:00:08 (0.3510 s / it)
+Epoch [0] Train - Loss: 40.8364, Class Error: 97.51
+Epoch: [1] Total time: 0:00:07 (0.2849 s / it)
+Epoch [1] Train - Loss: 34.2859, Class Error: 98.35
+Epoch: [2] Total time: 0:00:07 (0.2819 s / it)
+Epoch [2] Train - Loss: 32.0627, Class Error: 99.05
+Epoch: [3] Total time: 0:00:06 (0.2674 s / it)
+Epoch [3] Train - Loss: 32.2708, Class Error: 100.00
+Epoch: [4] Total time: 0:00:07 (0.2935 s / it)
+Epoch [4] Train - Loss: 31.8014, Class Error: 93.84
+Test: Total time: 0:00:09 (0.3895 s / it)
+Accumulating evaluation results...
+DONE (t=0.44s).
+IoU metric: bbox
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=100 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=100 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=  1 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets= 10 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = 0.000
+coco_evaluator.coco_eval['bbox'].stats: [6.09800359e-07 5.88640521e-06 0.00000000e+00 0.00000000e+00
+ 4.19481685e-07 2.52397985e-05 7.54830918e-06 1.50966184e-05
+ 5.28381643e-05 0.00000000e+00 5.76701269e-05 1.99362041e-04]
+Epoch [4] Val - AP: 0.000, AP50: 0.000, AP75: 0.000, AR: 0.000, Loss: 50.0412
+Validation score increased (-100000.000000 --> 0.000001).  Saving model ...
+Epoch: [5] Total time: 0:00:07 (0.2806 s / it)
+Epoch [5] Train - Loss: 31.6146, Class Error: 99.76
+Epoch: [6] Total time: 0:00:06 (0.2589 s / it)
+Epoch [6] Train - Loss: 31.1007, Class Error: 97.58
+Epoch: [7] Total time: 0:00:06 (0.2701 s / it)
+Epoch [7] Train - Loss: 30.8302, Class Error: 95.09
+Epoch: [8] Total time: 0:00:06 (0.2765 s / it)
+Epoch [8] Train - Loss: 29.4892, Class Error: 99.00
+Traceback (most recent call last):
+Traceback (most recent call last):
+  File "/workspace/DETR/detr/main.py", line 443, in <module>
+  File "/workspace/DETR/detr/main.py", line 443, in <module>
+        main(args)main(args)
+
+  File "/workspace/DETR/detr/main.py", line 364, in main
+  File "/workspace/DETR/detr/main.py", line 364, in main
+        train_stats = train_one_epoch(train_stats = train_one_epoch(
+
+                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+  File "/workspace/DETR/detr/engine.py", line 57, in train_one_epoch
+  File "/workspace/DETR/detr/engine.py", line 57, in train_one_epoch
+        losses.backward()losses.backward()
+
+  File "/usr/local/lib/python3.11/dist-packages/torch/_tensor.py", line 521, in backward
+  File "/usr/local/lib/python3.11/dist-packages/torch/_tensor.py", line 521, in backward
+        torch.autograd.backward(torch.autograd.backward(
+
+  File "/usr/local/lib/python3.11/dist-packages/torch/autograd/__init__.py", line 289, in backward
+  File "/usr/local/lib/python3.11/dist-packages/torch/autograd/__init__.py", line 289, in backward
+        _engine_run_backward(_engine_run_backward(
+
+  File "/usr/local/lib/python3.11/dist-packages/torch/autograd/graph.py", line 769, in _engine_run_backward
+  File "/usr/local/lib/python3.11/dist-packages/torch/autograd/graph.py", line 769, in _engine_run_backward
+        return Variable._execution_engine.run_backward(  # Calls into the C++ engine to run the backward passreturn Variable._execution_engine.run_backward(  # Calls into the C++ engine to run the backward pass
+
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+KeyboardInterruptKeyboardInterrupt
+

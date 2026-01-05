@@ -1,0 +1,319 @@
+Logging to: DETR/detr/test\terminal_log.txt
+Not using distributed mode
+git:
+  sha: 3f771182904ce1a360d82551e16f340762bee0a9, status: has uncommited changes, branch: main
+
+Namespace(lr=0.0001, lr_backbone=1e-05, batch_size=2, weight_decay=0.0001, epochs=1, lr_drop=200, clip_max_norm=0.1, frozen_weights=None, backbone='resnet50', dilation=False, position_embedding='sine', enc_layers=6, dec_layers=6, dim_feedforward=2048, hidden_dim=256, dropout=0.1, nheads=8, num_queries=100, pre_norm=False, masks=False, aux_loss=True, set_cost_class=1, set_cost_bbox=5, set_cost_giou=2, mask_loss_coef=1, dice_loss_coef=1, bbox_loss_coef=5, giou_loss_coef=2, eos_coef=0.1, dataset_file='coco', coco_path='S:/coco/coco2017', coco_panoptic_path=None, remove_difficult=False, output_dir='DETR/detr/test', device='cuda', seed=42, resume='weights/detr-r50-e632da11.pth', start_epoch=0, eval=False, num_workers=0, world_size=1, dist_url='env://', lr_depth_encoder=0.0001, depth_path='S:/coco/coco2017_depth', use_depth=True, debug=True, val_split=True, patience=5, use_sharefusion=True, distributed=False)
+C:\Users\ryosu\AppData\Local\Programs\Python\Python311\Lib\site-packages\torch\nn\modules\module.py:1326: UserWarning: expandable_segments not supported on this platform (Triggered internally at C:\actions-runner\_work\pytorch\pytorch\builder\windows\pytorch\c10/cuda/CUDAAllocatorConfig.h:28.)
+  return t.to(
+C:\Users\ryosu\AppData\Local\Programs\Python\Python311\Lib\site-packages\torch\nn\modules\module.py:1326: UserWarning: expandable_segments not supported on this platform (Triggered internally at C:\actions-runner\_work\pytorch\pytorch\builder\windows\pytorch\c10/cuda/CUDAAllocatorConfig.h:28.)
+  return t.to(
+number of params: 49717344
+Using split validation dataset for train
+loading annotations into memory...
+Done (t=0.28s)
+creating index...
+index created!
+Debug mode: using subset of size 100
+Using split validation dataset for val
+loading annotations into memory...
+Done (t=0.05s)
+creating index...
+index created!
+Debug mode: using subset of size 100
+Loading pretrained weights...
+Missing keys (new parameters): 134 keys
+  - transformer.encoder.layers.0.self_attn.q_proj.weight
+  - transformer.encoder.layers.0.self_attn.q_proj.bias
+  - transformer.encoder.layers.0.self_attn.k_proj.weight
+  ... and 131 more
+
+Copying RGB Encoder weights to Depth Encoder layers
+Depth Encoder initialized with RGB Encoder weights!
+RGB input_proj, Encoder, Decoder parameters frozen!
+
+================================================================================
+Module Name                              | Status          | Details
+--------------------------------------------------------------------------------
+Backbone (ResNet)                        | [90mALL FROZEN[0m | 0 / 23,454,912 params
+Input Proj (RGB)                         | [90mALL FROZEN[0m | 0 / 524,544 params
+Input Proj (Depth)                       | [92mALL TRAINABLE[0m | 524,544 / 524,544 params
+Transformer Encoder                      | [93mPARTIAL[0m | 7,890,432 / 15,780,864 params
+Transformer Decoder                      | [92mALL TRAINABLE[0m | 9,473,024 / 9,473,024 params
+Class/BBox Head                          | [92mALL TRAINABLE[0m | 23,644 / 23,644 params
+--------------------------------------------------------------------------------
+Total Trainable Params: 17,911,644
+================================================================================
+
+
+================================================================================
+Parameter Status Check:
+================================================================================
+RGB Encoder: 15,780,864 params, 7,890,432 trainable
+Decoder: 9,473,024 params, 9,473,024 trainable
+================================================================================
+
+Start training
+Epoch: [0] Total time: 0:00:13 (0.2672 s / it)
+Epoch [0] Train - Loss: 39.9471, Class Error: 98.63
+Test: Total time: 0:00:17 (0.3437 s / it)
+Accumulating evaluation results...
+DONE (t=0.10s).
+IoU metric: bbox
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=100 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=100 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=  1 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets= 10 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = 0.000
+coco_evaluator.coco_eval['bbox'].stats: [6.08275421e-07 2.04490535e-06 0.00000000e+00 1.08760285e-07
+ 6.47123536e-06 1.88540010e-08 0.00000000e+00 0.00000000e+00
+ 4.52898551e-05 8.29187396e-05 8.65051903e-05 3.98724083e-05]
+Epoch [0] Val - AP: 0.000, AP50: 0.000, AP75: 0.000, AR: 0.000, Loss: 50.2352
+Validation score increased (-100000.000000 --> 0.000001).  Saving model ...
+Training time 0:00:31
+Logging to: DETR/detr/test\terminal_log.txt
+Not using distributed mode
+git:
+  sha: 3f771182904ce1a360d82551e16f340762bee0a9, status: has uncommited changes, branch: main
+
+Namespace(lr=0.0001, lr_backbone=1e-05, batch_size=2, weight_decay=0.0001, epochs=1, lr_drop=200, clip_max_norm=0.1, frozen_weights=None, backbone='resnet50', dilation=False, position_embedding='sine', enc_layers=6, dec_layers=6, dim_feedforward=2048, hidden_dim=256, dropout=0.1, nheads=8, num_queries=100, pre_norm=False, masks=False, aux_loss=True, set_cost_class=1, set_cost_bbox=5, set_cost_giou=2, mask_loss_coef=1, dice_loss_coef=1, bbox_loss_coef=5, giou_loss_coef=2, eos_coef=0.1, dataset_file='coco', coco_path='S:/coco/coco2017', coco_panoptic_path=None, remove_difficult=False, output_dir='DETR/detr/test', device='cuda', seed=42, resume='weights/detr-r50-e632da11.pth', start_epoch=0, eval=False, num_workers=0, world_size=1, dist_url='env://', lr_depth_encoder=0.0001, depth_path='S:/coco/coco2017_depth', use_depth=True, debug=True, val_split=True, patience=5, use_sharefusion=True, distributed=False)
+C:\Users\ryosu\AppData\Local\Programs\Python\Python311\Lib\site-packages\torch\nn\modules\module.py:1326: UserWarning: expandable_segments not supported on this platform (Triggered internally at C:\actions-runner\_work\pytorch\pytorch\builder\windows\pytorch\c10/cuda/CUDAAllocatorConfig.h:28.)
+  return t.to(
+C:\Users\ryosu\AppData\Local\Programs\Python\Python311\Lib\site-packages\torch\nn\modules\module.py:1326: UserWarning: expandable_segments not supported on this platform (Triggered internally at C:\actions-runner\_work\pytorch\pytorch\builder\windows\pytorch\c10/cuda/CUDAAllocatorConfig.h:28.)
+  return t.to(
+number of params: 49717344
+Using split validation dataset for train
+loading annotations into memory...
+Done (t=0.28s)
+creating index...
+index created!
+Debug mode: using subset of size 100
+Using split validation dataset for val
+loading annotations into memory...
+Done (t=0.04s)
+creating index...
+index created!
+Debug mode: using subset of size 100
+Loading pretrained weights...
+Missing keys (new parameters): 134 keys
+  - transformer.encoder.layers.0.self_attn.q_proj.weight
+  - transformer.encoder.layers.0.self_attn.q_proj.bias
+  - transformer.encoder.layers.0.self_attn.k_proj.weight
+  ... and 131 more
+
+Copying RGB Encoder weights to Depth Encoder layers
+Depth Encoder initialized with RGB Encoder weights!
+RGB input_proj, Encoder, Decoder parameters frozen!
+
+================================================================================
+Module Name                              | Status          | Details
+--------------------------------------------------------------------------------
+Backbone (ResNet)                        | [90mALL FROZEN[0m | 0 / 23,454,912 params
+Input Proj (RGB)                         | [90mALL FROZEN[0m | 0 / 524,544 params
+Input Proj (Depth)                       | [92mALL TRAINABLE[0m | 524,544 / 524,544 params
+Transformer Encoder                      | [93mPARTIAL[0m | 7,890,432 / 15,780,864 params
+Transformer Decoder                      | [92mALL TRAINABLE[0m | 9,473,024 / 9,473,024 params
+Class/BBox Head                          | [92mALL TRAINABLE[0m | 23,644 / 23,644 params
+--------------------------------------------------------------------------------
+Total Trainable Params: 17,911,644
+================================================================================
+
+
+================================================================================
+Parameter Status Check:
+================================================================================
+RGB Encoder: 15,780,864 params, 7,890,432 trainable
+Decoder: 9,473,024 params, 9,473,024 trainable
+================================================================================
+
+Start training
+Epoch: [0] Total time: 0:00:13 (0.2627 s / it)
+Epoch [0] Train - Loss: 39.9471, Class Error: 98.63
+Test: Total time: 0:00:17 (0.3419 s / it)
+Accumulating evaluation results...
+DONE (t=0.09s).
+IoU metric: bbox
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=100 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=100 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=  1 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets= 10 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = 0.000
+coco_evaluator.coco_eval['bbox'].stats: [6.08275421e-07 2.04490535e-06 0.00000000e+00 1.08760285e-07
+ 6.47123536e-06 1.88540010e-08 0.00000000e+00 0.00000000e+00
+ 4.52898551e-05 8.29187396e-05 8.65051903e-05 3.98724083e-05]
+Epoch [0] Val - AP: 0.000, AP50: 0.000, AP75: 0.000, AR: 0.000, Loss: 50.2352
+Validation score increased (-100000.000000 --> 0.000001).  Saving model ...
+Training time 0:00:31
+Logging to: DETR/detr/test\terminal_log.txt
+Not using distributed mode
+git:
+  sha: 3f771182904ce1a360d82551e16f340762bee0a9, status: has uncommited changes, branch: main
+
+Namespace(lr=0.0001, lr_backbone=1e-05, batch_size=2, weight_decay=0.0001, epochs=1, lr_drop=200, clip_max_norm=0.1, frozen_weights=None, backbone='resnet50', dilation=False, position_embedding='sine', enc_layers=6, dec_layers=6, dim_feedforward=2048, hidden_dim=256, dropout=0.1, nheads=8, num_queries=100, pre_norm=False, masks=False, aux_loss=True, set_cost_class=1, set_cost_bbox=5, set_cost_giou=2, mask_loss_coef=1, dice_loss_coef=1, bbox_loss_coef=5, giou_loss_coef=2, eos_coef=0.1, dataset_file='coco', coco_path='S:/coco/coco2017', coco_panoptic_path=None, remove_difficult=False, output_dir='DETR/detr/test', device='cuda', seed=42, resume='weights/detr-r50-e632da11.pth', start_epoch=0, eval=False, num_workers=0, world_size=1, dist_url='env://', lr_depth_encoder=0.0001, depth_path='S:/coco/coco2017_depth', use_depth=True, debug=True, val_split=True, patience=5, use_sharefusion=True, distributed=False)
+C:\Users\ryosu\AppData\Local\Programs\Python\Python311\Lib\site-packages\torch\nn\modules\module.py:1326: UserWarning: expandable_segments not supported on this platform (Triggered internally at C:\actions-runner\_work\pytorch\pytorch\builder\windows\pytorch\c10/cuda/CUDAAllocatorConfig.h:28.)
+  return t.to(
+C:\Users\ryosu\AppData\Local\Programs\Python\Python311\Lib\site-packages\torch\nn\modules\module.py:1326: UserWarning: expandable_segments not supported on this platform (Triggered internally at C:\actions-runner\_work\pytorch\pytorch\builder\windows\pytorch\c10/cuda/CUDAAllocatorConfig.h:28.)
+  return t.to(
+number of params: 49717344
+Using split validation dataset for train
+loading annotations into memory...
+Done (t=0.27s)
+creating index...
+index created!
+Debug mode: using subset of size 100
+Using split validation dataset for val
+loading annotations into memory...
+Done (t=0.05s)
+creating index...
+index created!
+Debug mode: using subset of size 100
+Loading pretrained weights...
+Missing keys (new parameters): 134 keys
+  - transformer.encoder.layers.0.self_attn.q_proj.weight
+  - transformer.encoder.layers.0.self_attn.q_proj.bias
+  - transformer.encoder.layers.0.self_attn.k_proj.weight
+  ... and 131 more
+
+Copying RGB Encoder weights to Depth Encoder layers
+Depth Encoder initialized with RGB Encoder weights!
+RGB input_proj, Encoder, Decoder parameters frozen!
+
+================================================================================
+Module Name                              | Status          | Details
+--------------------------------------------------------------------------------
+Backbone (ResNet)                        | [90mALL FROZEN[0m | 0 / 23,454,912 params
+Input Proj (RGB)                         | [90mALL FROZEN[0m | 0 / 524,544 params
+Input Proj (Depth)                       | [92mALL TRAINABLE[0m | 524,544 / 524,544 params
+Transformer Encoder                      | [93mPARTIAL[0m | 7,890,432 / 15,780,864 params
+Transformer Decoder                      | [90mALL FROZEN[0m | 0 / 9,473,024 params
+Class/BBox Head                          | [92mALL TRAINABLE[0m | 23,644 / 23,644 params
+--------------------------------------------------------------------------------
+Total Trainable Params: 8,438,620
+================================================================================
+
+
+================================================================================
+Parameter Status Check:
+================================================================================
+RGB Encoder: 15,780,864 params, 7,890,432 trainable
+Decoder: 9,473,024 params, 0 trainable
+================================================================================
+
+Start training
+Epoch: [0] Total time: 0:00:13 (0.2653 s / it)
+Epoch [0] Train - Loss: 34.2357, Class Error: 96.09
+Test: Total time: 0:00:17 (0.3485 s / it)
+Accumulating evaluation results...
+DONE (t=0.11s).
+IoU metric: bbox
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.003
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=100 ] = 0.006
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=100 ] = 0.004
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = 0.009
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=  1 ] = 0.005
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets= 10 ] = 0.009
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.012
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = 0.001
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = 0.040
+coco_evaluator.coco_eval['bbox'].stats: [0.00332476 0.00592585 0.00413226 0.         0.00031593 0.00924309
+ 0.00522787 0.00940963 0.01231836 0.         0.00069204 0.03950359]
+Epoch [0] Val - AP: 0.003, AP50: 0.006, AP75: 0.004, AR: 0.012, Loss: 37.0020
+Validation score increased (-100000.000000 --> 0.003325).  Saving model ...
+Training time 0:00:31
+Logging to: DETR/detr/test\terminal_log.txt
+Not using distributed mode
+git:
+  sha: 3f771182904ce1a360d82551e16f340762bee0a9, status: has uncommited changes, branch: main
+
+Namespace(lr=0.0001, lr_backbone=1e-05, batch_size=2, weight_decay=0.0001, epochs=1, lr_drop=200, clip_max_norm=0.1, frozen_weights=None, backbone='resnet50', dilation=False, position_embedding='sine', enc_layers=6, dec_layers=6, dim_feedforward=2048, hidden_dim=256, dropout=0.1, nheads=8, num_queries=100, pre_norm=False, masks=False, aux_loss=True, set_cost_class=1, set_cost_bbox=5, set_cost_giou=2, mask_loss_coef=1, dice_loss_coef=1, bbox_loss_coef=5, giou_loss_coef=2, eos_coef=0.1, dataset_file='coco', coco_path='S:/coco/coco2017', coco_panoptic_path=None, remove_difficult=False, output_dir='DETR/detr/test', device='cuda', seed=42, resume='weights/detr-r50-e632da11.pth', start_epoch=0, eval=False, num_workers=0, world_size=1, dist_url='env://', lr_depth_encoder=0.0001, depth_path='S:/coco/coco2017_depth', use_depth=True, debug=True, val_split=True, patience=5, use_sharefusion=True, distributed=False)
+C:\Users\ryosu\AppData\Local\Programs\Python\Python311\Lib\site-packages\torch\nn\modules\module.py:1326: UserWarning: expandable_segments not supported on this platform (Triggered internally at C:\actions-runner\_work\pytorch\pytorch\builder\windows\pytorch\c10/cuda/CUDAAllocatorConfig.h:28.)
+  return t.to(
+C:\Users\ryosu\AppData\Local\Programs\Python\Python311\Lib\site-packages\torch\nn\modules\module.py:1326: UserWarning: expandable_segments not supported on this platform (Triggered internally at C:\actions-runner\_work\pytorch\pytorch\builder\windows\pytorch\c10/cuda/CUDAAllocatorConfig.h:28.)
+  return t.to(
+number of params: 49717344
+Using split validation dataset for train
+loading annotations into memory...
+Done (t=0.27s)
+creating index...
+index created!
+Debug mode: using subset of size 100
+Using split validation dataset for val
+loading annotations into memory...
+Done (t=0.05s)
+creating index...
+index created!
+Debug mode: using subset of size 100
+Loading pretrained weights...
+Missing keys (new parameters): 134 keys
+  - transformer.encoder.layers.0.self_attn.q_proj.weight
+  - transformer.encoder.layers.0.self_attn.q_proj.bias
+  - transformer.encoder.layers.0.self_attn.k_proj.weight
+  ... and 131 more
+
+Copying RGB Encoder weights to Depth Encoder layers
+Depth Encoder initialized with RGB Encoder weights!
+RGB input_proj, Encoder, Decoder parameters frozen!
+
+================================================================================
+Module Name                              | Status          | Details
+--------------------------------------------------------------------------------
+Backbone (ResNet)                        | [90mALL FROZEN[0m | 0 / 23,454,912 params
+Input Proj (RGB)                         | [90mALL FROZEN[0m | 0 / 524,544 params
+Input Proj (Depth)                       | [92mALL TRAINABLE[0m | 524,544 / 524,544 params
+Transformer Encoder                      | [93mPARTIAL[0m | 7,890,432 / 15,780,864 params
+Transformer Decoder                      | [90mALL FROZEN[0m | 0 / 9,473,024 params
+Class/BBox Head                          | [92mALL TRAINABLE[0m | 23,644 / 23,644 params
+--------------------------------------------------------------------------------
+Total Trainable Params: 8,438,620
+================================================================================
+
+
+================================================================================
+Parameter Status Check:
+================================================================================
+RGB Encoder: 15,780,864 params, 7,890,432 trainable
+Decoder: 9,473,024 params, 0 trainable
+================================================================================
+
+Start training
+Epoch: [0] Total time: 0:00:13 (0.2629 s / it)
+Epoch [0] Train - Loss: 33.7012, Class Error: 95.21
+Test: Total time: 0:00:17 (0.3459 s / it)
+Accumulating evaluation results...
+DONE (t=0.11s).
+IoU metric: bbox
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=100 ] = 0.001
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=100 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = 0.001
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=  1 ] = 0.003
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets= 10 ] = 0.003
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.004
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = 0.014
+coco_evaluator.coco_eval['bbox'].stats: [3.60996335e-04 7.32752249e-04 4.03247137e-04 0.00000000e+00
+ 4.44666283e-05 1.07474766e-03 2.67964976e-03 3.16274155e-03
+ 4.03726708e-03 0.00000000e+00 3.17185698e-04 1.42494019e-02]
+Epoch [0] Val - AP: 0.000, AP50: 0.001, AP75: 0.000, AR: 0.004, Loss: 35.3605
+Validation score increased (-100000.000000 --> 0.000361).  Saving model ...
+Training time 0:00:31
