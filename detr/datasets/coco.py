@@ -253,6 +253,7 @@ def build(image_set, args):
     
     if hasattr(args, 'debug') and args.debug:
         subset_size = min(100, len(dataset))
+        print(f"Debug mode: using subset of size {subset_size}")
         dataset = torch.utils.data.Subset(dataset, range(subset_size))
         
     return dataset

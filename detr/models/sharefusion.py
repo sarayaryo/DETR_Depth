@@ -32,7 +32,7 @@ class Transformer_RGBD(nn.Module):
         self.decoder = TransformerDecoder(decoder_layer, num_decoder_layers, decoder_norm,
                                           return_intermediate=return_intermediate_dec)
 
-        self._reset_parameters()
+        # self._reset_parameters()
 
         self.d_model = d_model
         self.nhead = nhead
@@ -207,8 +207,8 @@ class RGBD_MultiHeadAttention(nn.Module):
         dropout: float = 0.0,
         bias: bool = True,
         batch_first: bool = False,
-        alpha: float = 0.5,  # Fusion parameter
-        beta: float = 0.5,   # Fusion parameter
+        alpha: float = 0.0,  # Fusion parameter
+        beta: float = 0.0,   # Fusion parameter
     ) -> None:
         super().__init__()
         self.embed_dim = embed_dim

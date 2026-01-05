@@ -10,6 +10,8 @@ import warnings
 warnings.filterwarnings("ignore", category=UserWarning, module="torchvision.models._utils")
 
 import numpy as np
+import sys
+import os
 import torch
 from torch.utils.data import DataLoader, DistributedSampler
 
@@ -325,7 +327,7 @@ def main(args):
                 
             # 3. Decoder -> 学習
             for param in model_without_ddp.transformer.decoder.parameters():
-                param.requires_grad = True
+                param.requires_grad = False
 
             # 4. Encoder -> 「_depth」だけ学習、「RGB」は固定
             for name, param in model_without_ddp.transformer.encoder.named_parameters():
@@ -429,12 +431,10 @@ def main(args):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser('DETR training and evaluation script', parents=[get_args_parser()])
+    os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "expandable_segments:True"
     args = parser.parse_args()
     if args.output_dir:
-        Path(args.output_dir).mkdir(parents=True, exist_ok=True)
-
-        import sys
-        import os
+        Path(args.output_dir).mkdir(parents=True, exist_ok=True)       
         log_file_path = os.path.join(args.output_dir, 'terminal_log.txt')
         sys.stdout = TerminalLogger(log_file_path)
         sys.stderr = TerminalLogger(log_file_path) 
