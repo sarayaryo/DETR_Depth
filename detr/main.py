@@ -14,7 +14,7 @@ import torch
 from torch.utils.data import DataLoader, DistributedSampler
 
 import datasets
-from module import print_detailed_param_status, print_simplified_param_status
+from module import print_detailed_param_status, print_simplified_param_status, TerminalLogger
 import util.misc as utils
 from datasets import build_dataset, get_coco_api_from_dataset
 from engine import evaluate, train_one_epoch
@@ -168,7 +168,7 @@ def get_args_parser():
                         help='use a small subset of the dataset for debugging')
     parser.add_argument('--val_split', action='store_true',
                         help='use split validation set (train: 4000, test: 1000)')
-    parser.add_argument('--patience', default=3, type=int,
+    parser.add_argument('--patience', default=5, type=int,
                         help='Early stopping patience (epochs)')
     parser.add_argument('--use_sharefusion', default='False', type=bool,
                         help='Use ShareFusion architecture for RGB-D fusion')
@@ -323,9 +323,9 @@ def main(args):
             for param in model_without_ddp.backbone.parameters():
                 param.requires_grad = False
                 
-            # 3. Decoder -> 固定 (今回は固定する方針)
+            # 3. Decoder -> 学習
             for param in model_without_ddp.transformer.decoder.parameters():
-                param.requires_grad = False
+                param.requires_grad = True
 
             # 4. Encoder -> 「_depth」だけ学習、「RGB」は固定
             for name, param in model_without_ddp.transformer.encoder.named_parameters():
@@ -432,4 +432,11 @@ if __name__ == '__main__':
     args = parser.parse_args()
     if args.output_dir:
         Path(args.output_dir).mkdir(parents=True, exist_ok=True)
+
+        import sys
+        log_file_path = os.path.join(args.output_dir, 'terminal_log.txt')
+        sys.stdout = TerminalLogger(log_file_path)
+        sys.stderr = TerminalLogger(log_file_path) 
+        
+        print(f"Logging to: {log_file_path}")
     main(args)
