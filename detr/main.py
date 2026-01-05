@@ -434,6 +434,7 @@ if __name__ == '__main__':
         Path(args.output_dir).mkdir(parents=True, exist_ok=True)
 
         import sys
+        import os
         log_file_path = os.path.join(args.output_dir, 'terminal_log.txt')
         sys.stdout = TerminalLogger(log_file_path)
         sys.stderr = TerminalLogger(log_file_path) 

@@ -248,29 +248,6 @@ class RandomResize_Depth(object):
 
 
 
-class RandomResize_Depth(object):
-    def __init__(self, sizes, max_size=None):
-        assert isinstance(sizes, (list, tuple))
-        self.sizes = sizes
-        self.max_size = max_size
-
-    def __call__(self, img, target_or_depth=None, target=None):
-        size = random.choice(self.sizes)
-        
-        # Depth対応: 3引数の場合
-        if target is not None:
-            depth_img = target_or_depth
-            img_resized, target_resized = resize(img, target, size, self.max_size)
-            if depth_img is not None:
-                depth_img_resized, _ = resize(depth_img, None, size, self.max_size)
-            else:
-                depth_img_resized = None
-            return img_resized, depth_img_resized, target_resized
-        # 既存の2引数の場合
-        else:
-            return resize(img, target_or_depth, size, self.max_size)
-
-
 class RandomPad(object):
     def __init__(self, max_pad):
         self.max_pad = max_pad
@@ -339,6 +316,13 @@ class Normalize(object):
             boxes = boxes / torch.tensor([w, h, w, h], dtype=torch.float32)
             target["boxes"] = boxes
         return image, target
+
+class ToTensor_Depth(object):
+    def __call__(self, img, depth_img, target):
+        img = F.to_tensor(img)
+        if depth_img is not None:
+            depth_img = F.to_tensor(depth_img)
+        return img, depth_img, target
 
 ## changes here
 class NormalizeWithDepth(object):
