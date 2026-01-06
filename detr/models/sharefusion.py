@@ -334,8 +334,8 @@ class RGBD_MultiHeadAttention(nn.Module):
             self.alpha = nn.Parameter(torch.tensor(0.0))
             self.beta = nn.Parameter(torch.tensor(0.0))
         else:
-            self.alpha = 0.0
-            self.beta = 0.0
+            self.alpha = 0.5
+            self.beta = 0.5
     
     def forward(
         self,
