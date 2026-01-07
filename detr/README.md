@@ -28,3 +28,6 @@ python detr/main.py --coco_path "S:/coco/coco2017" --depth_path "S:/coco/coco201
 
 ##share-fusion 本番
 python DETR/detr/main.py --coco_path "/workspace/coco/coco2017" --depth_path "/workspace/coco/coco2017_depth" --use_depth --resume "/workspace/DETR/weights/detr-r50-e632da11.pth" --output_dir DETR/detr/outputs/[PE]sharefusion_alpha0.5_beta0.5_ep50_bs4_dec-frozen --epochs 50 --lr 1e-4 --lr_backbone 1e-5 --batch_size 4 --num_workers 8  --val_split --use_sharefusion --device cuda　
+
+
+python DETR/detr/main.py --coco_path "/workspace/coco/coco2017" --depth_path "/workspace/coco/coco2017_depth" --use_depth --resume "/workspace/DETR/weights/detr-r50-e632da11.pth" --output_dir DETR/detr/outputs/[PE2]sharefusion_alpha0.5_beta0.5_ep50_bs8_dec-frozen --epochs 50 --lr 1e-4 --lr_backbone 1e-5 --batch_size 4 --num_workers 8  --val_split --use_sharefusion --device cuda

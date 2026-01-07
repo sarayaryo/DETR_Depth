@@ -1,0 +1,212 @@
+Logging to: DETR/detr/outputs/[PE2]sharefusion_alpha0.5_beta0.5_ep50_bs8_dec-frozen/terminal_log.txt
+Not using distributed mode
+git:
+  sha: f3b3887407c1556da0b82a491920c5edd5e072a1, status: has uncommited changes, branch: main
+
+Traceback (most recent call last):
+Traceback (most recent call last):
+  File "/workspace/DETR/detr/main.py", line 513, in <module>
+  File "/workspace/DETR/detr/main.py", line 513, in <module>
+        main(args)main(args)
+
+  File "/workspace/DETR/detr/main.py", line 192, in main
+  File "/workspace/DETR/detr/main.py", line 192, in main
+        device = torch.device(args.device)device = torch.device(args.device)
+
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+RuntimeErrorRuntimeError: : Invalid device string: 'cuda　'Invalid device string: 'cuda　'
+
+Logging to: DETR/detr/outputs/[PE2]sharefusion_alpha0.5_beta0.5_ep50_bs8_dec-frozen/terminal_log.txt
+Not using distributed mode
+git:
+  sha: f3b3887407c1556da0b82a491920c5edd5e072a1, status: has uncommited changes, branch: main
+
+>>> Building RGB-D Transformer with ShareFusion...
+number of params: 49717344
+Traceback (most recent call last):
+Traceback (most recent call last):
+  File "/workspace/DETR/detr/main.py", line 513, in <module>
+  File "/workspace/DETR/detr/main.py", line 513, in <module>
+        main(args)main(args)
+
+  File "/workspace/DETR/detr/main.py", line 211, in main
+  File "/workspace/DETR/detr/main.py", line 211, in main
+        {"params": [p for n, p in model_without_ddp.named_parameters() {"params": [p for n, p in model_without_ddp.named_parameters() 
+
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+  File "/workspace/DETR/detr/main.py", line 214, in <listcomp>
+  File "/workspace/DETR/detr/main.py", line 214, in <listcomp>
+        and head_name not in nand head_name not in n
+
+                ^^^^^^^^^^^^^^^^^^
+
+NameErrorNameError: : name 'head_name' is not definedname 'head_name' is not defined
+
+Logging to: DETR/detr/outputs/[PE2]sharefusion_alpha0.5_beta0.5_ep50_bs8_dec-frozen/terminal_log.txt
+Not using distributed mode
+git:
+  sha: f3b3887407c1556da0b82a491920c5edd5e072a1, status: has uncommited changes, branch: main
+
+>>> Building RGB-D Transformer with ShareFusion...
+number of params: 49717344
+Using split validation dataset for train
+loading annotations into memory...
+Done (t=0.58s)
+creating index...
+index created!
+Using split validation dataset for val
+loading annotations into memory...
+Done (t=0.08s)
+creating index...
+index created!
+Renamed 24 keys for RGB-Stream compatibility.
+>>> RGB Stream weights loaded successfully.
+>>> Initializing Depth Stream from RGB weights...
+>>> Depth Stream initialized.
+============================================================
+
+
+================================================================================
+Module Name                              | Status          | Details
+--------------------------------------------------------------------------------
+Backbone (ResNet)                        | [90mALL FROZEN[0m | 0 / 23,454,912 params
+Input Proj (RGB)                         | [90mALL FROZEN[0m | 0 / 524,544 params
+Input Proj (Depth)                       | [92mALL TRAINABLE[0m | 524,544 / 524,544 params
+Transformer Encoder                      | [93mPARTIAL[0m | 7,890,432 / 15,780,864 params
+Transformer Decoder                      | [90mALL FROZEN[0m | 0 / 9,473,024 params
+Class/BBox Head                          | [92mALL TRAINABLE[0m | 23,644 / 23,644 params
+--------------------------------------------------------------------------------
+Total Trainable Params: 8,438,620
+================================================================================
+
+
+================================================================================
+Parameter Status Check:
+================================================================================
+RGB Encoder: 15,780,864 params, 7,890,432 trainable
+Decoder: 9,473,024 params, 0 trainable
+================================================================================
+
+Start training
+Epoch: [0] Total time: 0:04:19 (0.5186 s / it)
+Epoch [0] Train - Loss: 10.1937, Class Error: 31.11
+Epoch: [1] Total time: 0:04:14 (0.5093 s / it)
+Epoch [1] Train - Loss: 9.4967, Class Error: 28.10
+Traceback (most recent call last):
+Traceback (most recent call last):
+  File "/workspace/DETR/detr/main.py", line 514, in <module>
+  File "/workspace/DETR/detr/main.py", line 514, in <module>
+        main(args)main(args)
+
+  File "/workspace/DETR/detr/main.py", line 437, in main
+  File "/workspace/DETR/detr/main.py", line 437, in main
+        train_stats = train_one_epoch(train_stats = train_one_epoch(
+
+                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+  File "/workspace/DETR/detr/engine.py", line 36, in train_one_epoch
+  File "/workspace/DETR/detr/engine.py", line 36, in train_one_epoch
+        outputs = model(samples, samples_depth)outputs = model(samples, samples_depth)
+
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+  File "/usr/local/lib/python3.11/dist-packages/torch/nn/modules/module.py", line 1553, in _wrapped_call_impl
+  File "/usr/local/lib/python3.11/dist-packages/torch/nn/modules/module.py", line 1553, in _wrapped_call_impl
+        return self._call_impl(*args, **kwargs)return self._call_impl(*args, **kwargs)
+
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+  File "/usr/local/lib/python3.11/dist-packages/torch/nn/modules/module.py", line 1562, in _call_impl
+  File "/usr/local/lib/python3.11/dist-packages/torch/nn/modules/module.py", line 1562, in _call_impl
+        return forward_call(*args, **kwargs)return forward_call(*args, **kwargs)
+
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+  File "/workspace/DETR/detr/models/detr.py", line 87, in forward
+  File "/workspace/DETR/detr/models/detr.py", line 87, in forward
+        hs, attn_weights, _ , _= self.transformer(self.input_proj(src), mask, self.query_embed.weight, pos[-1], self.input_proj_depth(src_depth), pos_depth[-1])  hs, attn_weights, _ , _= self.transformer(self.input_proj(src), mask, self.query_embed.weight, pos[-1], self.input_proj_depth(src_depth), pos_depth[-1])  
+
+                                                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+  File "/usr/local/lib/python3.11/dist-packages/torch/nn/modules/module.py", line 1553, in _wrapped_call_impl
+  File "/usr/local/lib/python3.11/dist-packages/torch/nn/modules/module.py", line 1553, in _wrapped_call_impl
+        return self._call_impl(*args, **kwargs)return self._call_impl(*args, **kwargs)
+
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+  File "/usr/local/lib/python3.11/dist-packages/torch/nn/modules/module.py", line 1562, in _call_impl
+  File "/usr/local/lib/python3.11/dist-packages/torch/nn/modules/module.py", line 1562, in _call_impl
+        return forward_call(*args, **kwargs)return forward_call(*args, **kwargs)
+
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+  File "/workspace/DETR/detr/models/sharefusion.py", line 61, in forward
+  File "/workspace/DETR/detr/models/sharefusion.py", line 61, in forward
+        memory, memory_depth = self.encoder(src, src_depth, src_key_padding_mask=mask, pos=pos_embed, pos_depth=pos_embed_depth)memory, memory_depth = self.encoder(src, src_depth, src_key_padding_mask=mask, pos=pos_embed, pos_depth=pos_embed_depth)
+
+                                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+  File "/usr/local/lib/python3.11/dist-packages/torch/nn/modules/module.py", line 1553, in _wrapped_call_impl
+  File "/usr/local/lib/python3.11/dist-packages/torch/nn/modules/module.py", line 1553, in _wrapped_call_impl
+        return self._call_impl(*args, **kwargs)return self._call_impl(*args, **kwargs)
+
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+  File "/usr/local/lib/python3.11/dist-packages/torch/nn/modules/module.py", line 1562, in _call_impl
+  File "/usr/local/lib/python3.11/dist-packages/torch/nn/modules/module.py", line 1562, in _call_impl
+        return forward_call(*args, **kwargs)return forward_call(*args, **kwargs)
+
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+  File "/workspace/DETR/detr/models/sharefusion.py", line 91, in forward
+  File "/workspace/DETR/detr/models/sharefusion.py", line 91, in forward
+        output, output_depth = layer(output, output_depth, src_mask=mask,output, output_depth = layer(output, output_depth, src_mask=mask,
+
+                                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+  File "/usr/local/lib/python3.11/dist-packages/torch/nn/modules/module.py", line 1553, in _wrapped_call_impl
+  File "/usr/local/lib/python3.11/dist-packages/torch/nn/modules/module.py", line 1553, in _wrapped_call_impl
+        return self._call_impl(*args, **kwargs)return self._call_impl(*args, **kwargs)
+
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+  File "/usr/local/lib/python3.11/dist-packages/torch/nn/modules/module.py", line 1562, in _call_impl
+  File "/usr/local/lib/python3.11/dist-packages/torch/nn/modules/module.py", line 1562, in _call_impl
+        return forward_call(*args, **kwargs)return forward_call(*args, **kwargs)
+
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+  File "/workspace/DETR/detr/models/sharefusion.py", line 199, in forward
+  File "/workspace/DETR/detr/models/sharefusion.py", line 199, in forward
+        return self.forward_post(src, src_depth, src_mask, src_key_padding_mask, pos, pos_depth)return self.forward_post(src, src_depth, src_mask, src_key_padding_mask, pos, pos_depth)
+
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+  File "/workspace/DETR/detr/models/sharefusion.py", line 141, in forward_post
+  File "/workspace/DETR/detr/models/sharefusion.py", line 141, in forward_post
+        src2, src_depth2, _, _ = self.self_attn(q, k, src, q_depth, k_depth, src_depth,attn_mask=src_mask,src2, src_depth2, _, _ = self.self_attn(q, k, src, q_depth, k_depth, src_depth,attn_mask=src_mask,
+
+                                                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+  File "/usr/local/lib/python3.11/dist-packages/torch/nn/modules/module.py", line 1553, in _wrapped_call_impl
+  File "/usr/local/lib/python3.11/dist-packages/torch/nn/modules/module.py", line 1553, in _wrapped_call_impl
+        return self._call_impl(*args, **kwargs)return self._call_impl(*args, **kwargs)
+
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+  File "/usr/local/lib/python3.11/dist-packages/torch/nn/modules/module.py", line 1562, in _call_impl
+  File "/usr/local/lib/python3.11/dist-packages/torch/nn/modules/module.py", line 1562, in _call_impl
+        return forward_call(*args, **kwargs)return forward_call(*args, **kwargs)
+
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+  File "/workspace/DETR/detr/models/sharefusion.py", line 385, in forward
+  File "/workspace/DETR/detr/models/sharefusion.py", line 385, in forward
+        shared_probs_rgb = (1 - self.alpha) * attn_probs_rgb + self.alpha * attn_probs_dptshared_probs_rgb = (1 - self.alpha) * attn_probs_rgb + self.alpha * attn_probs_dpt
+
+                                                                                                                      ~~~~~~~~~~~~~~~~~~~~~~^^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+torchtorch..OutOfMemoryErrorOutOfMemoryError: : CUDA out of memory. Tried to allocate 690.00 MiB. GPU 0 has a total capacity of 23.53 GiB of which 390.75 MiB is free. Process 3179653 has 23.14 GiB memory in use. Of the allocated memory 22.61 GiB is allocated by PyTorch, and 69.76 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://pytorch.org/docs/stable/notes/cuda.html#environment-variables)CUDA out of memory. Tried to allocate 690.00 MiB. GPU 0 has a total capacity of 23.53 GiB of which 390.75 MiB is free. Process 3179653 has 23.14 GiB memory in use. Of the allocated memory 22.61 GiB is allocated by PyTorch, and 69.76 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://pytorch.org/docs/stable/notes/cuda.html#environment-variables)
+

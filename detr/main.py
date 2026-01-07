@@ -206,12 +206,13 @@ def main(args):
         model_without_ddp = model.module
     n_parameters = sum(p.numel() for p in model.parameters() if p.requires_grad)
     print('number of params:', n_parameters)
+    head_name = "class_embed"
 
     param_dicts = [
         {"params": [p for n, p in model_without_ddp.named_parameters() 
                        if "backbone" not in n 
                        and "_depth" not in n 
-
+                       and head_name not in n
                        and "input_proj" not in n 
                        and p.requires_grad],
         "lr": args.lr
@@ -225,6 +226,12 @@ def main(args):
             "params": [p for n, p in model_without_ddp.named_parameters() 
                     if ("_depth" in n or "input_proj_depth" in n) and p.requires_grad],
             "lr": args.lr * 1.0,
+        },
+        # 追加: Class Head (分類層) だけ学習率を上げる
+        {
+            "params": [p for n, p in model_without_ddp.named_parameters() 
+                    if head_name in n and p.requires_grad],
+            "lr": args.lr * 10.0, 
         },
     ]
     optimizer = torch.optim.AdamW(param_dicts, lr=args.lr, weight_decay=args.weight_decay)
@@ -279,8 +286,7 @@ def main(args):
 
             model_dict = model_without_ddp.state_dict()
             # ---------------------------------------------------------
-            # 状態辞書の整形 (Renaming)
-            #    Checkpointの "self_attn.xxx" を "self_attn.rgb_attn.xxx" に変換
+            # Checkpointの "self_attn.xxx" -> "self_attn.rgb_attn.xxx" に変換
             # ---------------------------------------------------------
             new_state_dict = {}
             renamed_count = 0
@@ -402,7 +408,6 @@ def main(args):
                 param.requires_grad = False
 
             
-
     print_simplified_param_status(model_without_ddp)
     print_parameter_status(model_without_ddp)
 

@@ -25,7 +25,7 @@ def train_one_epoch(model: torch.nn.Module, criterion: torch.nn.Module,
     header = 'Epoch: [{}]'.format(epoch)
     print_freq = 5000
 
-    for samples, samples_depth, targets in metric_logger.log_every(data_loader, print_freq, header):
+    for i, (samples, samples_depth, targets) in enumerate(metric_logger.log_every(data_loader, print_freq, header)):
         samples = samples.to(device)
         targets = [{k: v.to(device) for k, v in t.items()} for t in targets]
 
@@ -52,12 +52,17 @@ def train_one_epoch(model: torch.nn.Module, criterion: torch.nn.Module,
             print("Loss is {}, stopping training".format(loss_value))
             print(loss_dict_reduced)
             sys.exit(1)
+        
+        ## changes here
+        gradient_accumulation_steps = 2
+        loss_to_backward = losses / gradient_accumulation_steps
+        loss_to_backward.backward()
 
-        optimizer.zero_grad()
-        losses.backward()
-        if max_norm > 0:
-            torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm)
-        optimizer.step()
+        if (i + 1) % gradient_accumulation_steps == 0:
+            if max_norm > 0:
+                torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm)
+            optimizer.step()
+            optimizer.zero_grad()
 
         # metric_logger.update(loss=loss_value, **loss_dict_reduced_scaled, **loss_dict_reduced_unscaled)
         # metric_logger.update(class_error=loss_dict_reduced['class_error'])
