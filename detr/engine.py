@@ -12,11 +12,12 @@ import torch
 import util.misc as utils
 from datasets.coco_eval import CocoEvaluator
 from datasets.panoptic_eval import PanopticEvaluator
+from custom_module import _print_fusion_params
 
 
 def train_one_epoch(model: torch.nn.Module, criterion: torch.nn.Module,
                     data_loader: Iterable, optimizer: torch.optim.Optimizer,
-                    device: torch.device, epoch: int, max_norm: float = 0):
+                    device: torch.device, epoch: int, max_norm: float = 0, args=None):
     model.train()
     criterion.train()
     metric_logger = utils.MetricLogger(delimiter="  ")
@@ -74,11 +75,13 @@ def train_one_epoch(model: torch.nn.Module, criterion: torch.nn.Module,
     # print("Averaged stats:", metric_logger)
     print(f"Epoch [{epoch}] Train - Loss: {metric_logger.meters['loss'].global_avg:.4f}, "
           f"Class Error: {metric_logger.meters['class_error'].global_avg:.2f}")
+    if args is not None and getattr(args, 'use_learnable_param', False):
+        _print_fusion_params(model)
     return {k: meter.global_avg for k, meter in metric_logger.meters.items()}
 
 
 @torch.no_grad()
-def evaluate(model, criterion, postprocessors, data_loader, base_ds, device, output_dir, epoch=None):
+def evaluate(model, criterion, postprocessors, data_loader, base_ds, device, output_dir, epoch=None, args=None):
     model.eval()
     criterion.eval()
 
@@ -163,7 +166,8 @@ def evaluate(model, criterion, postprocessors, data_loader, base_ds, device, out
             ar = stats[8]  # AR@[0.5:0.95]
             print(f"Epoch [{epoch}] Val - AP: {ap:.3f}, AP50: {ap50:.3f}, AP75: {ap75:.3f}, AR: {ar:.3f}, "
                   f"Loss: {metric_logger.meters['loss'].global_avg:.4f}")
-       
+        if args is not None and getattr(args, 'use_learnable_param', False):
+            _print_fusion_params(model)
     panoptic_res = None
     if panoptic_evaluator is not None:
         panoptic_res = panoptic_evaluator.summarize()

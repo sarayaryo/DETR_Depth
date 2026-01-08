@@ -16,7 +16,7 @@ import torch
 from torch.utils.data import DataLoader, DistributedSampler
 
 import datasets
-from custom_module import print_detailed_param_status, print_simplified_param_status, TerminalLogger
+from custom_module import print_detailed_param_status, print_simplified_param_status, TerminalLogger, _print_fusion_params
 import util.misc as utils
 from datasets import build_dataset, get_coco_api_from_dataset
 from engine import evaluate, train_one_epoch
@@ -440,13 +440,15 @@ def main(args):
 
     print("Start training")
     start_time = time.time()
+    if args.use_learnable_param:
+        _print_fusion_params(model_without_ddp)
     for epoch in range(args.start_epoch, args.epochs):
         
         if args.distributed:
             sampler_train.set_epoch(epoch)
         train_stats = train_one_epoch(
             model, criterion, data_loader_train, optimizer, device, epoch,
-            args.clip_max_norm)                                                                                                                 
+            args.clip_max_norm, args=args)                                                                                                                 
         lr_scheduler.step()
         if args.output_dir:
             checkpoint_paths = [output_dir / 'checkpoint.pth']
@@ -467,7 +469,7 @@ def main(args):
         coco_evaluator = None
         if (epoch + 1) % 5 == 0 or (epoch + 1) == args.epochs:
             test_stats, coco_evaluator = evaluate(
-                model, criterion, postprocessors, data_loader_val, base_ds, device, args.output_dir, epoch=epoch
+                model, criterion, postprocessors, data_loader_val, base_ds, device, args.output_dir, epoch=epoch, args=args
             )
             if coco_evaluator is not None and 'bbox' in coco_evaluator.coco_eval:
                 # mAP (IoU=0.50:0.95) を監視対象にする

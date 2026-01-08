@@ -1,0 +1,283 @@
+Logging to: DETR/detr/outputs/test/terminal_log.txt
+Not using distributed mode
+git:
+  sha: 42515d26a79ff6441af91470fa87f6d1eac55bb1, status: has uncommited changes, branch: main
+
+>>> Building RGB-D Transformer with ShareFusion...
+number of params: 49717356
+Using split validation dataset for train
+loading annotations into memory...
+Done (t=0.77s)
+creating index...
+index created!
+Debug mode: using subset of size 100
+Using split validation dataset for val
+loading annotations into memory...
+Done (t=0.13s)
+creating index...
+index created!
+Debug mode: using subset of size 100
+Renamed 24 keys for RGB-Stream compatibility.
+>>> RGB Stream weights loaded successfully.
+>>> Initializing Depth Stream from RGB weights...
+>>> Depth Stream initialized.
+============================================================
+
+
+================================================================================
+Module Name                              | Status          | Details
+--------------------------------------------------------------------------------
+Backbone (ResNet)                        | [90mALL FROZEN[0m | 0 / 23,454,912 params
+Input Proj (RGB)                         | [90mALL FROZEN[0m | 0 / 524,544 params
+Input Proj (Depth)                       | [92mALL TRAINABLE[0m | 524,544 / 524,544 params
+Transformer Encoder                      | [93mPARTIAL[0m | 7,890,432 / 15,780,876 params
+Transformer Decoder                      | [90mALL FROZEN[0m | 0 / 9,473,024 params
+Class/BBox Head                          | [92mALL TRAINABLE[0m | 23,644 / 23,644 params
+--------------------------------------------------------------------------------
+Total Trainable Params: 8,438,620
+================================================================================
+
+
+================================================================================
+Parameter Status Check:
+================================================================================
+RGB Encoder: 15,780,876 params, 7,890,432 trainable
+Decoder: 9,473,024 params, 0 trainable
+================================================================================
+
+Start training
+Epoch: [0] Total time: 0:00:07 (0.2938 s / it)
+Epoch [0] Train - Loss: 14.4930, Class Error: 61.34
+ [Fusion] Avg Alpha: 0.622 | Avg Beta: 0.622 (over 6 layers)
+Test: Total time: 0:00:08 (0.3403 s / it)
+Accumulating evaluation results...
+DONE (t=0.26s).
+IoU metric: bbox
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.360
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=100 ] = 0.537
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=100 ] = 0.372
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.106
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = 0.394
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = 0.528
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=  1 ] = 0.318
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets= 10 ] = 0.473
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.506
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.177
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = 0.503
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = 0.724
+coco_evaluator.coco_eval['bbox'].stats: [0.35951873 0.53724654 0.37217323 0.10601265 0.39356918 0.52770822
+ 0.31792591 0.47326445 0.50578902 0.17677847 0.50306237 0.72406001]
+Epoch [0] Val - AP: 0.360, AP50: 0.537, AP75: 0.372, AR: 0.506, Loss: 10.4475
+ [Fusion] Avg Alpha: 0.622 | Avg Beta: 0.622 (over 6 layers)
+Validation score increased (-100000.000000 --> 0.359519).  Saving model ...
+Training time 0:00:18
+Logging to: DETR/detr/outputs/test/terminal_log.txt
+Not using distributed mode
+git:
+  sha: 42515d26a79ff6441af91470fa87f6d1eac55bb1, status: has uncommited changes, branch: main
+
+>>> Building RGB-D Transformer with ShareFusion...
+number of params: 49717356
+Using split validation dataset for train
+loading annotations into memory...
+Done (t=0.59s)
+creating index...
+index created!
+Debug mode: using subset of size 100
+Using split validation dataset for val
+loading annotations into memory...
+Done (t=0.08s)
+creating index...
+index created!
+Debug mode: using subset of size 100
+Renamed 24 keys for RGB-Stream compatibility.
+>>> RGB Stream weights loaded successfully.
+>>> Initializing Depth Stream from RGB weights...
+>>> Depth Stream initialized.
+============================================================
+
+
+================================================================================
+Module Name                              | Status          | Details
+--------------------------------------------------------------------------------
+Backbone (ResNet)                        | [90mALL FROZEN[0m | 0 / 23,454,912 params
+Input Proj (RGB)                         | [90mALL FROZEN[0m | 0 / 524,544 params
+Input Proj (Depth)                       | [92mALL TRAINABLE[0m | 524,544 / 524,544 params
+Transformer Encoder                      | [93mPARTIAL[0m | 7,890,432 / 15,780,876 params
+Transformer Decoder                      | [90mALL FROZEN[0m | 0 / 9,473,024 params
+Class/BBox Head                          | [92mALL TRAINABLE[0m | 23,644 / 23,644 params
+--------------------------------------------------------------------------------
+Total Trainable Params: 8,438,620
+================================================================================
+
+
+================================================================================
+Parameter Status Check:
+================================================================================
+RGB Encoder: 15,780,876 params, 7,890,432 trainable
+Decoder: 9,473,024 params, 0 trainable
+================================================================================
+
+Start training
+Traceback (most recent call last):
+Traceback (most recent call last):
+  File "/workspace/DETR/detr/main.py", line 526, in <module>
+  File "/workspace/DETR/detr/main.py", line 526, in <module>
+        main(args)main(args)
+
+  File "/workspace/DETR/detr/main.py", line 443, in main
+  File "/workspace/DETR/detr/main.py", line 443, in main
+        if args.print_fusion_params:if args.print_fusion_params:
+
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+AttributeErrorAttributeError: : 'Namespace' object has no attribute 'print_fusion_params''Namespace' object has no attribute 'print_fusion_params'
+
+Logging to: DETR/detr/outputs/test/terminal_log.txt
+Not using distributed mode
+git:
+  sha: 42515d26a79ff6441af91470fa87f6d1eac55bb1, status: has uncommited changes, branch: main
+
+>>> Building RGB-D Transformer with ShareFusion...
+number of params: 49717356
+Using split validation dataset for train
+loading annotations into memory...
+Done (t=0.58s)
+creating index...
+index created!
+Debug mode: using subset of size 100
+Using split validation dataset for val
+loading annotations into memory...
+Done (t=0.08s)
+creating index...
+index created!
+Debug mode: using subset of size 100
+Renamed 24 keys for RGB-Stream compatibility.
+>>> RGB Stream weights loaded successfully.
+>>> Initializing Depth Stream from RGB weights...
+>>> Depth Stream initialized.
+============================================================
+
+
+================================================================================
+Module Name                              | Status          | Details
+--------------------------------------------------------------------------------
+Backbone (ResNet)                        | [90mALL FROZEN[0m | 0 / 23,454,912 params
+Input Proj (RGB)                         | [90mALL FROZEN[0m | 0 / 524,544 params
+Input Proj (Depth)                       | [92mALL TRAINABLE[0m | 524,544 / 524,544 params
+Transformer Encoder                      | [93mPARTIAL[0m | 7,890,432 / 15,780,876 params
+Transformer Decoder                      | [90mALL FROZEN[0m | 0 / 9,473,024 params
+Class/BBox Head                          | [92mALL TRAINABLE[0m | 23,644 / 23,644 params
+--------------------------------------------------------------------------------
+Total Trainable Params: 8,438,620
+================================================================================
+
+
+================================================================================
+Parameter Status Check:
+================================================================================
+RGB Encoder: 15,780,876 params, 7,890,432 trainable
+Decoder: 9,473,024 params, 0 trainable
+================================================================================
+
+Start training
+ [Fusion] Avg Alpha: 0.622 | Avg Beta: 0.622 (over 6 layers)
+Epoch: [0] Total time: 0:00:07 (0.2980 s / it)
+Epoch [0] Train - Loss: 14.5830, Class Error: 63.62
+ [Fusion] Avg Alpha: 0.622 | Avg Beta: 0.622 (over 6 layers)
+Test: Total time: 0:00:08 (0.3543 s / it)
+Accumulating evaluation results...
+DONE (t=0.41s).
+IoU metric: bbox
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.358
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=100 ] = 0.536
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=100 ] = 0.383
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.111
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = 0.383
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = 0.540
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=  1 ] = 0.309
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets= 10 ] = 0.472
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.513
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.202
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = 0.506
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = 0.741
+coco_evaluator.coco_eval['bbox'].stats: [0.35829172 0.53572866 0.38258998 0.11054768 0.38276063 0.54022663
+ 0.30921126 0.4717057  0.51253561 0.2021622  0.50627506 0.74070707]
+Epoch [0] Val - AP: 0.358, AP50: 0.536, AP75: 0.383, AR: 0.513, Loss: 10.1432
+ [Fusion] Avg Alpha: 0.622 | Avg Beta: 0.622 (over 6 layers)
+Validation score increased (-100000.000000 --> 0.358292).  Saving model ...
+Training time 0:00:19
+Logging to: DETR/detr/outputs/test/terminal_log.txt
+Not using distributed mode
+git:
+  sha: 42515d26a79ff6441af91470fa87f6d1eac55bb1, status: has uncommited changes, branch: main
+
+>>> Building RGB-D Transformer with ShareFusion...
+number of params: 49717356
+Using split validation dataset for train
+loading annotations into memory...
+Done (t=0.55s)
+creating index...
+index created!
+Debug mode: using subset of size 100
+Using split validation dataset for val
+loading annotations into memory...
+Done (t=0.11s)
+creating index...
+index created!
+Debug mode: using subset of size 100
+Renamed 24 keys for RGB-Stream compatibility.
+>>> RGB Stream weights loaded successfully.
+>>> Initializing Depth Stream from RGB weights...
+>>> Depth Stream initialized.
+============================================================
+
+
+================================================================================
+Module Name                              | Status          | Details
+--------------------------------------------------------------------------------
+Backbone (ResNet)                        | [90mALL FROZEN[0m | 0 / 23,454,912 params
+Input Proj (RGB)                         | [90mALL FROZEN[0m | 0 / 524,544 params
+Input Proj (Depth)                       | [92mALL TRAINABLE[0m | 524,544 / 524,544 params
+Transformer Encoder                      | [93mPARTIAL[0m | 7,890,432 / 15,780,876 params
+Transformer Decoder                      | [90mALL FROZEN[0m | 0 / 9,473,024 params
+Class/BBox Head                          | [92mALL TRAINABLE[0m | 23,644 / 23,644 params
+--------------------------------------------------------------------------------
+Total Trainable Params: 8,438,620
+================================================================================
+
+
+================================================================================
+Parameter Status Check:
+================================================================================
+RGB Encoder: 15,780,876 params, 7,890,432 trainable
+Decoder: 9,473,024 params, 0 trainable
+================================================================================
+
+Start training
+ [Fusion] Avg Alpha: 0.500 | Avg Beta: 0.500 (over 6 layers)
+Epoch: [0] Total time: 0:00:07 (0.2972 s / it)
+Epoch [0] Train - Loss: 14.4718, Class Error: 57.75
+ [Fusion] Avg Alpha: 0.500 | Avg Beta: 0.500 (over 6 layers)
+Test: Total time: 0:00:08 (0.3432 s / it)
+Accumulating evaluation results...
+DONE (t=0.25s).
+IoU metric: bbox
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.345
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=100 ] = 0.544
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=100 ] = 0.352
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.112
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = 0.388
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = 0.500
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=  1 ] = 0.319
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets= 10 ] = 0.480
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.523
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.193
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = 0.533
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = 0.757
+coco_evaluator.coco_eval['bbox'].stats: [0.34459454 0.54362487 0.35180297 0.11197569 0.38808539 0.49975583
+ 0.31915296 0.47984989 0.52321692 0.19341065 0.53305089 0.75702253]
+Epoch [0] Val - AP: 0.345, AP50: 0.544, AP75: 0.352, AR: 0.523, Loss: 10.0639
+ [Fusion] Avg Alpha: 0.500 | Avg Beta: 0.500 (over 6 layers)
+Validation score increased (-100000.000000 --> 0.344595).  Saving model ...
+Training time 0:00:18

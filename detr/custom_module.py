@@ -1,3 +1,51 @@
+def _print_fusion_params(model):
+    import torch
+    import numpy as np
+    """Share-Fusionパラメータ(alpha, beta)の平均値を1行でコンパクトに表示する"""
+    if isinstance(model, (torch.nn.parallel.DistributedDataParallel, torch.nn.DataParallel)):
+        model = model.module
+    
+    # Transformerエンコーダ層へのアクセス
+    transformer = getattr(model, 'transformer', None)
+    if transformer is None: return
+    encoder = getattr(transformer, 'encoder', None)
+    if encoder is None: return
+    layers = getattr(encoder, 'layers', [])
+
+    alpha_vals = []
+    beta_vals = []
+
+    for layer in layers:
+        attn = getattr(layer, 'self_attn', None)
+        if attn is None: continue
+
+        # Alpha値の取得 (学習可能ならsigmoidを通す)
+        if hasattr(attn, 'alpha'):
+            val = attn.alpha
+            if isinstance(val, (torch.nn.Parameter, torch.Tensor)):
+                alpha_vals.append(torch.sigmoid(val).item())
+            else:
+                alpha_vals.append(val)
+
+        # Beta値の取得
+        if hasattr(attn, 'beta'):
+            val = attn.beta
+            if isinstance(val, (torch.nn.Parameter, torch.Tensor)):
+                beta_vals.append(torch.sigmoid(val).item())
+            else:
+                beta_vals.append(val)
+
+    # 1行で表示
+    msgs = []
+    if alpha_vals:
+        avg_alpha = sum(alpha_vals) / len(alpha_vals)
+        msgs.append(f"Avg Alpha: {avg_alpha:.3f}")
+    if beta_vals:
+        avg_beta = sum(beta_vals) / len(beta_vals)
+        msgs.append(f"Avg Beta: {avg_beta:.3f}")
+    
+    if msgs:
+        print(f" [Fusion] {' | '.join(msgs)} (over {len(alpha_vals)} layers)")
 
 def print_detailed_param_status(model):
     print("\n" + "="*90)

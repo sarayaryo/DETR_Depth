@@ -212,8 +212,8 @@ class RGBD_MultiHeadAttention(nn.Module):
 
         # Fusion parameters
         if args.use_learnable_param:
-            self.alpha = nn.Parameter(torch.tensor(0.5))
-            self.beta = nn.Parameter(torch.tensor(0.5))
+            self.alpha = nn.Parameter(torch.tensor(0.0))
+            self.beta = nn.Parameter(torch.tensor(0.0))
         else:
             self.alpha = 0.0
             self.beta = 0.0
