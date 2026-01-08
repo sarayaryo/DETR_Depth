@@ -210,3 +210,49 @@ Traceback (most recent call last):
 
 torchtorch..OutOfMemoryErrorOutOfMemoryError: : CUDA out of memory. Tried to allocate 690.00 MiB. GPU 0 has a total capacity of 23.53 GiB of which 390.75 MiB is free. Process 3179653 has 23.14 GiB memory in use. Of the allocated memory 22.61 GiB is allocated by PyTorch, and 69.76 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://pytorch.org/docs/stable/notes/cuda.html#environment-variables)CUDA out of memory. Tried to allocate 690.00 MiB. GPU 0 has a total capacity of 23.53 GiB of which 390.75 MiB is free. Process 3179653 has 23.14 GiB memory in use. Of the allocated memory 22.61 GiB is allocated by PyTorch, and 69.76 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://pytorch.org/docs/stable/notes/cuda.html#environment-variables)
 
+Logging to: DETR/detr/outputs/[PE2]sharefusion_alpha0.5_beta0.5_ep50_bs8_dec-frozen/terminal_log.txt
+Not using distributed mode
+Traceback (most recent call last):
+Traceback (most recent call last):
+  File "/workspace/DETR/detr/main.py", line 512, in <module>
+  File "/workspace/DETR/detr/main.py", line 512, in <module>
+        main(args)main(args)
+
+  File "/workspace/DETR/detr/main.py", line 187, in main
+  File "/workspace/DETR/detr/main.py", line 187, in main
+        print("git:\n  {}\n".format(utils.get_sha()))print("git:\n  {}\n".format(utils.get_sha()))
+
+                                                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+  File "/workspace/DETR/detr/util/misc.py", line 264, in get_sha
+  File "/workspace/DETR/detr/util/misc.py", line 264, in get_sha
+        branch = _run(['git', 'rev-parse', '--abbrev-ref', 'HEAD'])branch = _run(['git', 'rev-parse', '--abbrev-ref', 'HEAD'])
+
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+  File "/workspace/DETR/detr/util/misc.py", line 255, in _run
+  File "/workspace/DETR/detr/util/misc.py", line 255, in _run
+        return subprocess.check_output(command, cwd=cwd).decode('ascii').strip()return subprocess.check_output(command, cwd=cwd).decode('ascii').strip()
+
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+  File "/usr/lib/python3.11/subprocess.py", line 466, in check_output
+  File "/usr/lib/python3.11/subprocess.py", line 466, in check_output
+        return run(*popenargs, stdout=PIPE, timeout=timeout, check=True,return run(*popenargs, stdout=PIPE, timeout=timeout, check=True,
+
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+  File "/usr/lib/python3.11/subprocess.py", line 550, in run
+  File "/usr/lib/python3.11/subprocess.py", line 550, in run
+        stdout, stderr = process.communicate(input, timeout=timeout)stdout, stderr = process.communicate(input, timeout=timeout)
+
+                                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+  File "/usr/lib/python3.11/subprocess.py", line 1196, in communicate
+  File "/usr/lib/python3.11/subprocess.py", line 1196, in communicate
+        stdout = self.stdout.read()stdout = self.stdout.read()
+
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+KeyboardInterruptKeyboardInterrupt
+

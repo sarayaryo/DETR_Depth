@@ -209,28 +209,40 @@ def main(args):
     head_name = "class_embed"
 
     param_dicts = [
-        {"params": [p for n, p in model_without_ddp.named_parameters() 
+        # 1. other parameters
+        {
+            "params": [p for n, p in model_without_ddp.named_parameters() 
                        if "backbone" not in n 
                        and "_depth" not in n 
-                       and head_name not in n
                        and "input_proj" not in n 
+                       and head_name not in n
+                       and "alpha" not in n  
+                       and "beta" not in n   
                        and p.requires_grad],
-        "lr": args.lr
+            "lr": args.lr
         },
+        # 2. Backbone
         {
-            "params": [p for n, p in model_without_ddp.named_parameters() if "backbone" in n and p.requires_grad],
+            "params": [p for n, p in model_without_ddp.named_parameters() 
+                       if "backbone" in n and p.requires_grad],
             "lr": args.lr_backbone,
         },
-        ## changes here
+        # 3. Depth
         {
             "params": [p for n, p in model_without_ddp.named_parameters() 
-                    if ("_depth" in n or "input_proj_depth" in n) and p.requires_grad],
+                       if ("_depth" in n or "input_proj_depth" in n) and p.requires_grad],
             "lr": args.lr * 1.0,
         },
-        # 追加: Class Head (分類層) だけ学習率を上げる
+        # 4. Class Head
         {
             "params": [p for n, p in model_without_ddp.named_parameters() 
-                    if head_name in n and p.requires_grad],
+                       if head_name in n and p.requires_grad],
+            "lr": args.lr * 10.0, 
+        },
+        # 5. fusion parameters
+        {
+            "params": [p for n, p in model_without_ddp.named_parameters() 
+                       if ("alpha" in n or "beta" in n) and p.requires_grad],
             "lr": args.lr * 10.0, 
         },
     ]

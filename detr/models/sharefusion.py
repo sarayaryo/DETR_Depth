@@ -197,125 +197,6 @@ class EncoderLayer_RGBD(nn.Module):
         if self.normalize_before:
             return self.forward_pre(src, src_depth, src_mask, src_key_padding_mask, pos, pos_depth)
         return self.forward_post(src, src_depth, src_mask, src_key_padding_mask, pos, pos_depth)
-
-
-# class RGBD_MultiHeadAttention(nn.Module):
-#     def __init__(self, embed_dim, num_heads, dropout=0.0, bias=True, alpha=0.5, beta=0.5):
-#         super().__init__()
-#         self.embed_dim = embed_dim
-#         self.num_heads = num_heads
-#         self.head_dim = embed_dim // num_heads
-#         self.alpha = alpha
-#         self.beta = beta
-
-#         self.rgb_attn = nn.MultiheadAttention(embed_dim, num_heads, dropout=dropout, bias=bias)
-#         self.depth_attn = nn.MultiheadAttention(embed_dim, num_heads, dropout=dropout, bias=bias)
-
-
-#         assert self.head_dim * num_heads == self.embed_dim, "embed_dim must be divisible by num_heads"
-
-#         # --- RGB Stream Layers ---
-#         self.q_proj = nn.Linear(embed_dim, embed_dim, bias=bias)
-#         self.k_proj = nn.Linear(embed_dim, embed_dim, bias=bias)
-#         self.v_proj = nn.Linear(embed_dim, embed_dim, bias=bias)
-#         self.out_proj = nn.Linear(embed_dim, embed_dim, bias=bias)
-
-#         # --- Depth Stream Layers ---
-#         self.q_proj_depth = nn.Linear(embed_dim, embed_dim, bias=bias)
-#         self.k_proj_depth = nn.Linear(embed_dim, embed_dim, bias=bias)
-#         self.v_proj_depth = nn.Linear(embed_dim, embed_dim, bias=bias)
-#         self.out_proj_depth = nn.Linear(embed_dim, embed_dim, bias=bias)
-
-#         self.dropout = nn.Dropout(dropout)
-
-#     from typing import Optional, Tuple
-#     def forward(
-#         self,
-#         query: Tensor,           # RGB Query
-#         key: Tensor,             # RGB Key
-#         value: Tensor,           # RGB Value
-#         query_depth: Tensor,     # Depth Query
-#         key_depth: Tensor,       # Depth Key
-#         value_depth: Tensor,     # Depth Value
-#         key_padding_mask: Optional[Tensor] = None,
-#         attn_mask: Optional[Tensor] = None,
-#         need_weights: bool = True,
-#     ) -> Tuple[Tuple[Tensor, Tensor], Optional[Tensor]]:
-        
-#         if self.batch_first:
-#             # (Batch, Len, Dim) ->そのままでOK
-#             pass
-#         else:
-#             # (Len, Batch, Dim) -> (Batch, Len, Dim) に統一して計算
-#             query = query.transpose(0, 1)
-#             key = key.transpose(0, 1)
-#             value = value.transpose(0, 1)
-#             query_depth = query_depth.transpose(0, 1)
-#             key_depth = key_depth.transpose(0, 1)
-#             value_depth = value_depth.transpose(0, 1)
-
-#         B, L, _ = query.shape
-#         _, S, _ = key.shape
-
-#         # 2. 射影 (Projection) & Head分割
-#         # Shape: (Batch, Heads, Len, HeadDim)
-        
-#         # --- RGB ---
-#         q = self.q_proj(query).view(B, L, self.num_heads, self.head_dim).transpose(1, 2)
-#         k = self.k_proj(key).view(B, S, self.num_heads, self.head_dim).transpose(1, 2)
-#         v = self.v_proj(value).view(B, S, self.num_heads, self.head_dim).transpose(1, 2)
-
-#         # --- Depth ---
-#         q_d = self.q_proj_depth(query_depth).view(B, L, self.num_heads, self.head_dim).transpose(1, 2)
-#         k_d = self.k_proj_depth(key_depth).view(B, S, self.num_heads, self.head_dim).transpose(1, 2)
-#         v_d = self.v_proj_depth(value_depth).view(B, S, self.num_heads, self.head_dim).transpose(1, 2)
-
-#         # 3. Attention Score (Scaled Dot-Product)
-#         # (Batch, Heads, L, S)
-#         scale = math.sqrt(self.head_dim)
-#         attn_weights_img = torch.matmul(q, k.transpose(-2, -1)) / scale
-#         attn_weights_dpt = torch.matmul(q_d, k_d.transpose(-2, -1)) / scale
-
-#         # 4. Mask 適用
-#         # key_padding_mask: (Batch, S) -> Trueの部分を無視
-#         if key_padding_mask is not None:
-#             # (Batch, 1, 1, S) に拡張してマスク
-#             mask = key_padding_mask.view(B, 1, 1, S)
-#             attn_weights_img = attn_weights_img.masked_fill(mask, float('-inf'))
-#             attn_weights_dpt = attn_weights_dpt.masked_fill(mask, float('-inf'))
-
-#         # attn_mask: (L, S) など
-#         if attn_mask is not None:
-#             attn_weights_img += attn_mask
-#             attn_weights_dpt += attn_mask
-
-#         # 5. Softmax & Dropout
-#         attn_probs_img = F.softmax(attn_weights_img, dim=-1)
-#         attn_probs_img = self.dropout(attn_probs_img)
-
-#         attn_probs_dpt = F.softmax(attn_weights_dpt, dim=-1)
-#         attn_probs_dpt = self.dropout(attn_probs_dpt)
-
-#         # 6. Share-Fusion
-#         shared_probs_img = (1 - self.alpha) * attn_probs_img + self.alpha * attn_probs_dpt
-#         shared_probs_dpt = (1 - self.beta) * attn_probs_dpt + self.beta * attn_probs_img
-
-#         # 7. Valueとの積
-#         # (Batch, Heads, L, S) x (Batch, Heads, S, HeadDim) -> (Batch, Heads, L, HeadDim)
-#         output_img = torch.matmul(shared_probs_img, v)
-#         output_dpt = torch.matmul(shared_probs_dpt, v_d)
-
-#         # 8. 結合 & 出力射影
-#         # (Batch, Heads, L, HeadDim) -> (Batch, L, Dim)
-#         output_img = output_img.transpose(1, 2).contiguous().view(B, L, self.embed_dim)
-#         output_dpt = output_dpt.transpose(1, 2).contiguous().view(B, L, self.embed_dim)
-
-#         output_img = self.out_proj(output_img)
-#         output_dpt = self.out_proj_depth(output_dpt)
-
-#         # 戻り値: ((RGB出力, Depth出力), Attention重み(代表してRGBまたはNone))
-#         # EncoderLayer側の期待する受け取り方に合わせて調整してください
-#         return output_img, output_dpt, shared_probs_img, shared_probs_dpt
     
 
 class RGBD_MultiHeadAttention(nn.Module):
@@ -329,13 +210,13 @@ class RGBD_MultiHeadAttention(nn.Module):
         self.head_dim = embed_dim // num_heads
         assert self.head_dim * num_heads == self.embed_dim
 
-        # Fusionパラメータ
+        # Fusion parameters
         if args.use_learnable_param:
-            self.alpha = nn.Parameter(torch.tensor(0.0))
-            self.beta = nn.Parameter(torch.tensor(0.0))
+            self.alpha = nn.Parameter(torch.tensor(0.5))
+            self.beta = nn.Parameter(torch.tensor(0.5))
         else:
-            self.alpha = 0.5
-            self.beta = 0.5
+            self.alpha = 0.0
+            self.beta = 0.0
     
     def forward(
         self,
