@@ -1,0 +1,47 @@
+Logging to: DETR/detr/outputs/[PE3]ARfusion_alphalearn_betalearn_*10_ep50_bs8-4*2_dec-frozen/terminal_log.txt
+Not using distributed mode
+git:
+  sha: 34e9db1f0d8d5faa0fe3c2e45545a752befa9dce, status: has uncommited changes, branch: main
+
+>>> Building RGB-D Transformer with ShareFusion...
+number of params: 49717356
+Using split validation dataset for train
+loading annotations into memory...
+Done (t=0.55s)
+creating index...
+index created!
+Using split validation dataset for val
+loading annotations into memory...
+Done (t=0.09s)
+creating index...
+index created!
+Renamed 24 keys for RGB-Stream compatibility.
+>>> RGB Stream weights loaded successfully.
+>>> Initializing Depth Stream from RGB weights...
+>>> Depth Stream initialized.
+============================================================
+
+
+================================================================================
+Module Name                              | Status          | Details
+--------------------------------------------------------------------------------
+Backbone (ResNet)                        | [90mALL FROZEN[0m | 0 / 23,454,912 params
+Input Proj (RGB)                         | [90mALL FROZEN[0m | 0 / 524,544 params
+Input Proj (Depth)                       | [92mALL TRAINABLE[0m | 524,544 / 524,544 params
+Transformer Encoder                      | [93mPARTIAL[0m | 7,890,444 / 15,780,876 params
+Transformer Decoder                      | [90mALL FROZEN[0m | 0 / 9,473,024 params
+Class/BBox Head                          | [92mALL TRAINABLE[0m | 23,644 / 23,644 params
+--------------------------------------------------------------------------------
+Total Trainable Params: 8,438,632
+================================================================================
+
+
+================================================================================
+Parameter Status Check:
+================================================================================
+RGB Encoder: 15,780,876 params, 7,890,444 trainable
+Decoder: 9,473,024 params, 0 trainable
+================================================================================
+
+Start training
+ [Fusion] Avg Alpha: 0.500 | Avg Beta: 0.500 (over 6 layers)

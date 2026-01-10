@@ -174,6 +174,8 @@ def get_args_parser():
                         help='Early stopping patience (epochs)')
     parser.add_argument('--use_sharefusion', action='store_true',
                         help='Use ShareFusion architecture for RGB-D fusion')
+    parser.add_argument('--use_ar_fusion', action='store_true',
+                        help='Use AR-Fusion method for attention fusion in ShareFusion modules')
     parser.add_argument('--use_learnable_param', action='store_true',
                         help='Use learnable fusion weights in ShareFusion modules')
 
@@ -411,9 +413,10 @@ def main(args):
         for name, param in model_without_ddp.transformer.encoder.named_parameters():
             # Depth関連のキーワードが含まれているかチェック
             is_depth_param = ("_depth" in name) or ("depth_attn" in name)
-            
-            if is_depth_param:
-                # Depth用 -> 学習 (Trainable)
+            is_fusion = ("alpha" in name) or ("beta" in name)
+
+            if is_depth_param or is_fusion:
+                # Depth用 or fusion parameter -> 学習 (Trainable)
                 param.requires_grad = True
             else:
                 # RGB用 (linear1, norm1, rgb_attnなど) -> 固定 (Frozen)

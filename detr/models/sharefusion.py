@@ -215,8 +215,10 @@ class RGBD_MultiHeadAttention(nn.Module):
             self.alpha = nn.Parameter(torch.tensor(0.0))
             self.beta = nn.Parameter(torch.tensor(0.0))
         else:
-            self.alpha = 0.0
+            self.alpha = 0.5
             self.beta = 0.0
+        if args.use_ar_fusion:
+            self.use_ar_fusion = True
     
     def forward(
         self,
@@ -263,8 +265,10 @@ class RGBD_MultiHeadAttention(nn.Module):
         attn_probs_dpt = F.dropout(attn_probs_dpt, p=self.depth_attn.dropout, training=self.training)
 
         # --- 3. Share-Fusion (確率分布の混合) ---
-        shared_probs_rgb = (1 - self.alpha) * attn_probs_rgb + self.alpha * attn_probs_dpt
-        shared_probs_dpt = (1 - self.beta) * attn_probs_dpt + self.beta * attn_probs_rgb
+        if self.use_ar_fusion:
+            shared_probs_rgb, shared_probs_dpt = ARfusion(self.alpha, self.beta, attn_probs_rgb, attn_probs_dpt)
+        else:
+            shared_probs_rgb, shared_probs_dpt = sharefusion(self.alpha, self.beta, attn_probs_rgb, attn_probs_dpt)
 
         # --- 4. Valueとの積 & 出力射影 ---
         output_rgb = torch.matmul(shared_probs_rgb, v_rgb)
@@ -352,3 +356,16 @@ def _get_activation_fn(activation):
     if activation == "glu":
         return F.glu
     raise RuntimeError(F"activation should be relu/gelu, not {activation}.")
+
+def sharefusion(alpha, beta, attn_rgb, attn_dpt):
+    """ Share-Fusion Function """
+    fused_attn_rgb = (1 - alpha) * attn_rgb + alpha * attn_dpt
+    fused_attn_dpt = (1 - beta) * attn_dpt + beta * attn_rgb
+    return fused_attn_rgb, fused_attn_dpt
+
+def ARfusion(alpha, beta, attn_rgb, attn_dpt):
+    """ Adaptive Residual Fusion Function """
+    agreement = nn.functional.softmax(attn_rgb * attn_dpt, dim=-1)
+    fused_attn_rgb = agreement * alpha + attn_rgb
+    fused_attn_dpt = agreement * beta + attn_dpt
+    return fused_attn_rgb, fused_attn_dpt

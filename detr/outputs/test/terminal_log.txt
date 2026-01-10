@@ -281,3 +281,195 @@ Epoch [0] Val - AP: 0.345, AP50: 0.544, AP75: 0.352, AR: 0.523, Loss: 10.0639
  [Fusion] Avg Alpha: 0.500 | Avg Beta: 0.500 (over 6 layers)
 Validation score increased (-100000.000000 --> 0.344595).  Saving model ...
 Training time 0:00:18
+Logging to: DETR/detr/outputs/test/terminal_log.txt
+Not using distributed mode
+git:
+  sha: 34e9db1f0d8d5faa0fe3c2e45545a752befa9dce, status: has uncommited changes, branch: main
+
+>>> Building RGB-D Transformer with ShareFusion...
+number of params: 49717356
+Using split validation dataset for train
+loading annotations into memory...
+Done (t=0.69s)
+creating index...
+index created!
+Debug mode: using subset of size 100
+Using split validation dataset for val
+loading annotations into memory...
+Done (t=0.10s)
+creating index...
+index created!
+Debug mode: using subset of size 100
+Renamed 24 keys for RGB-Stream compatibility.
+>>> RGB Stream weights loaded successfully.
+>>> Initializing Depth Stream from RGB weights...
+>>> Depth Stream initialized.
+============================================================
+
+
+================================================================================
+Module Name                              | Status          | Details
+--------------------------------------------------------------------------------
+Backbone (ResNet)                        | [90mALL FROZEN[0m | 0 / 23,454,912 params
+Input Proj (RGB)                         | [90mALL FROZEN[0m | 0 / 524,544 params
+Input Proj (Depth)                       | [92mALL TRAINABLE[0m | 524,544 / 524,544 params
+Transformer Encoder                      | [93mPARTIAL[0m | 7,890,444 / 15,780,876 params
+Transformer Decoder                      | [90mALL FROZEN[0m | 0 / 9,473,024 params
+Class/BBox Head                          | [92mALL TRAINABLE[0m | 23,644 / 23,644 params
+--------------------------------------------------------------------------------
+Total Trainable Params: 8,438,632
+================================================================================
+
+
+================================================================================
+Parameter Status Check:
+================================================================================
+RGB Encoder: 15,780,876 params, 7,890,444 trainable
+Decoder: 9,473,024 params, 0 trainable
+================================================================================
+
+Start training
+ [Fusion] Avg Alpha: 0.500 | Avg Beta: 0.500 (over 6 layers)
+Epoch: [0] Total time: 0:00:07 (0.3132 s / it)
+Epoch [0] Train - Loss: 14.2518, Class Error: 61.29
+ [Fusion] Avg Alpha: 0.501 | Avg Beta: 0.500 (over 6 layers)
+Epoch: [1] Total time: 0:00:06 (0.2688 s / it)
+Epoch [1] Train - Loss: 10.4328, Class Error: 28.15
+ [Fusion] Avg Alpha: 0.502 | Avg Beta: 0.501 (over 6 layers)
+Epoch: [2] Total time: 0:00:06 (0.2670 s / it)
+Epoch [2] Train - Loss: 9.8198, Class Error: 33.82
+ [Fusion] Avg Alpha: 0.502 | Avg Beta: 0.501 (over 6 layers)
+Epoch: [3] Total time: 0:00:06 (0.2766 s / it)
+Epoch [3] Train - Loss: 8.8924, Class Error: 24.91
+ [Fusion] Avg Alpha: 0.503 | Avg Beta: 0.501 (over 6 layers)
+Epoch: [4] Total time: 0:00:06 (0.2690 s / it)
+Epoch [4] Train - Loss: 8.8130, Class Error: 24.72
+ [Fusion] Avg Alpha: 0.503 | Avg Beta: 0.501 (over 6 layers)
+Traceback (most recent call last):
+Traceback (most recent call last):
+  File "/workspace/DETR/detr/main.py", line 527, in <module>
+  File "/workspace/DETR/detr/main.py", line 527, in <module>
+        main(args)main(args)
+
+  File "/workspace/DETR/detr/main.py", line 472, in main
+  File "/workspace/DETR/detr/main.py", line 472, in main
+        test_stats, coco_evaluator = evaluate(test_stats, coco_evaluator = evaluate(
+
+                                                                  ^^^^^^^^^^^^^^^^^^
+
+  File "/usr/local/lib/python3.11/dist-packages/torch/utils/_contextlib.py", line 116, in decorate_context
+  File "/usr/local/lib/python3.11/dist-packages/torch/utils/_contextlib.py", line 116, in decorate_context
+        return func(*args, **kwargs)return func(*args, **kwargs)
+
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+  File "/workspace/DETR/detr/engine.py", line 110, in evaluate
+  File "/workspace/DETR/detr/engine.py", line 110, in evaluate
+        outputs = model(samples, samples_depth)outputs = model(samples, samples_depth)
+
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+  File "/usr/local/lib/python3.11/dist-packages/torch/nn/modules/module.py", line 1553, in _wrapped_call_impl
+  File "/usr/local/lib/python3.11/dist-packages/torch/nn/modules/module.py", line 1553, in _wrapped_call_impl
+        return self._call_impl(*args, **kwargs)return self._call_impl(*args, **kwargs)
+
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+  File "/usr/local/lib/python3.11/dist-packages/torch/nn/modules/module.py", line 1562, in _call_impl
+  File "/usr/local/lib/python3.11/dist-packages/torch/nn/modules/module.py", line 1562, in _call_impl
+        return forward_call(*args, **kwargs)return forward_call(*args, **kwargs)
+
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+  File "/workspace/DETR/detr/models/detr.py", line 87, in forward
+  File "/workspace/DETR/detr/models/detr.py", line 87, in forward
+        hs, attn_weights, _ , _= self.transformer(self.input_proj(src), mask, self.query_embed.weight, pos[-1], self.input_proj_depth(src_depth), pos_depth[-1])  hs, attn_weights, _ , _= self.transformer(self.input_proj(src), mask, self.query_embed.weight, pos[-1], self.input_proj_depth(src_depth), pos_depth[-1])  
+
+                                                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+  File "/usr/local/lib/python3.11/dist-packages/torch/nn/modules/module.py", line 1553, in _wrapped_call_impl
+  File "/usr/local/lib/python3.11/dist-packages/torch/nn/modules/module.py", line 1553, in _wrapped_call_impl
+        return self._call_impl(*args, **kwargs)return self._call_impl(*args, **kwargs)
+
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+  File "/usr/local/lib/python3.11/dist-packages/torch/nn/modules/module.py", line 1562, in _call_impl
+  File "/usr/local/lib/python3.11/dist-packages/torch/nn/modules/module.py", line 1562, in _call_impl
+        return forward_call(*args, **kwargs)return forward_call(*args, **kwargs)
+
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+  File "/workspace/DETR/detr/models/sharefusion.py", line 64, in forward
+  File "/workspace/DETR/detr/models/sharefusion.py", line 64, in forward
+        hs, attn_weights = self.decoder(tgt, memory, memory_key_padding_mask=mask, ## changes herehs, attn_weights = self.decoder(tgt, memory, memory_key_padding_mask=mask, ## changes here
+
+                                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+  File "/usr/local/lib/python3.11/dist-packages/torch/nn/modules/module.py", line 1553, in _wrapped_call_impl
+  File "/usr/local/lib/python3.11/dist-packages/torch/nn/modules/module.py", line 1553, in _wrapped_call_impl
+        return self._call_impl(*args, **kwargs)return self._call_impl(*args, **kwargs)
+
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+  File "/usr/local/lib/python3.11/dist-packages/torch/nn/modules/module.py", line 1562, in _call_impl
+  File "/usr/local/lib/python3.11/dist-packages/torch/nn/modules/module.py", line 1562, in _call_impl
+        return forward_call(*args, **kwargs)return forward_call(*args, **kwargs)
+
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+  File "/workspace/DETR/detr/models/transformer.py", line 134, in forward
+  File "/workspace/DETR/detr/models/transformer.py", line 134, in forward
+        output, attn = layer(output, memory, tgt_mask=tgt_mask, ## changes hereoutput, attn = layer(output, memory, tgt_mask=tgt_mask, ## changes here
+
+                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+  File "/usr/local/lib/python3.11/dist-packages/torch/nn/modules/module.py", line 1553, in _wrapped_call_impl
+  File "/usr/local/lib/python3.11/dist-packages/torch/nn/modules/module.py", line 1553, in _wrapped_call_impl
+        return self._call_impl(*args, **kwargs)return self._call_impl(*args, **kwargs)
+
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+  File "/usr/local/lib/python3.11/dist-packages/torch/nn/modules/module.py", line 1562, in _call_impl
+  File "/usr/local/lib/python3.11/dist-packages/torch/nn/modules/module.py", line 1562, in _call_impl
+        return forward_call(*args, **kwargs)return forward_call(*args, **kwargs)
+
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+  File "/workspace/DETR/detr/models/transformer.py", line 297, in forward
+  File "/workspace/DETR/detr/models/transformer.py", line 297, in forward
+        return self.forward_post(tgt, memory, tgt_mask, memory_mask,return self.forward_post(tgt, memory, tgt_mask, memory_mask,
+
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+  File "/workspace/DETR/detr/models/transformer.py", line 250, in forward_post
+  File "/workspace/DETR/detr/models/transformer.py", line 250, in forward_post
+        tgt = self.norm1(tgt)tgt = self.norm1(tgt)
+
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+  File "/usr/local/lib/python3.11/dist-packages/torch/nn/modules/module.py", line 1553, in _wrapped_call_impl
+  File "/usr/local/lib/python3.11/dist-packages/torch/nn/modules/module.py", line 1553, in _wrapped_call_impl
+        return self._call_impl(*args, **kwargs)return self._call_impl(*args, **kwargs)
+
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+  File "/usr/local/lib/python3.11/dist-packages/torch/nn/modules/module.py", line 1562, in _call_impl
+  File "/usr/local/lib/python3.11/dist-packages/torch/nn/modules/module.py", line 1562, in _call_impl
+        return forward_call(*args, **kwargs)return forward_call(*args, **kwargs)
+
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+  File "/usr/local/lib/python3.11/dist-packages/torch/nn/modules/normalization.py", line 202, in forward
+  File "/usr/local/lib/python3.11/dist-packages/torch/nn/modules/normalization.py", line 202, in forward
+        return F.layer_norm(return F.layer_norm(
+
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+  File "/usr/local/lib/python3.11/dist-packages/torch/nn/functional.py", line 2576, in layer_norm
+  File "/usr/local/lib/python3.11/dist-packages/torch/nn/functional.py", line 2576, in layer_norm
+        return torch.layer_norm(input, normalized_shape, weight, bias, eps, torch.backends.cudnn.enabled)return torch.layer_norm(input, normalized_shape, weight, bias, eps, torch.backends.cudnn.enabled)
+
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+KeyboardInterruptKeyboardInterrupt
+
