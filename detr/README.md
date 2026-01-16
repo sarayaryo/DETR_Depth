@@ -34,6 +34,8 @@ python DETR/detr/main.py --coco_path "/workspace/coco/coco2017" --depth_path "/w
 
 python DETR/detr/main.py --coco_path "/workspace/coco/coco2017" --depth_path "/workspace/coco/coco2017_depth" --use_depth --resume "/workspace/DETR/weights/detr-r50-e632da11.pth" --output_dir DETR/detr/outputs/test --epochs 5 --lr 1e-4 --lr_backbone 1e-5 --batch_size 4 --num_workers 8  --val_split --use_sharefusion --device cuda --use_learnable_param --debug
 
+# share-fusion
+python DETR/detr/main.py --coco_path "/workspace/coco/coco2017" --depth_path "/workspace/coco/coco2017_depth" --use_depth --resume "/workspace/DETR/weights/detr-r50-e632da11.pth" --output_dir DETR/detr/outputs/[PE2]sharefusion_alpha0.0_beta0.5_ep50_bs-4*2_dec-frozen --epochs 50 --lr 1e-4 --lr_backbone 1e-5 --batch_size 4 --num_workers 8  --val_split --use_sharefusion --device cuda 
 
 # alphabeta learn 0.001
 python DETR/detr/main.py --coco_path "/workspace/coco/coco2017" --depth_path "/workspace/coco/coco2017_depth" --use_depth --resume "/workspace/DETR/weights/detr-r50-e632da11.pth" --output_dir DETR/detr/outputs/[PE3]sharefusion_alphalearn_betalearn_*10_ep50_bs8-4*2_dec-frozen --epochs 50 --lr 1e-4 --lr_backbone 1e-5 --batch_size 4 --num_workers 8  --val_split --use_sharefusion --device cuda --use_learnable_param

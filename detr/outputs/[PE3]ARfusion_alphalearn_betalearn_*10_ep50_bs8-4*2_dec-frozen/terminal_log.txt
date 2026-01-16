@@ -45,3 +45,221 @@ Decoder: 9,473,024 params, 0 trainable
 
 Start training
  [Fusion] Avg Alpha: 0.500 | Avg Beta: 0.500 (over 6 layers)
+Epoch: [0] Total time: 0:04:04 (0.2449 s / it)
+Epoch [0] Train - Loss: 9.2741, Class Error: 28.21
+ [Fusion] Avg Alpha: 0.503 | Avg Beta: 0.505 (over 6 layers)
+Epoch: [1] Total time: 0:04:06 (0.2469 s / it)
+Epoch [1] Train - Loss: 8.6665, Class Error: 26.04
+ [Fusion] Avg Alpha: 0.501 | Avg Beta: 0.503 (over 6 layers)
+Epoch: [2] Total time: 0:04:10 (0.2502 s / it)
+Epoch [2] Train - Loss: 8.5295, Class Error: 25.15
+ [Fusion] Avg Alpha: 0.496 | Avg Beta: 0.501 (over 6 layers)
+Epoch: [3] Total time: 0:04:07 (0.2471 s / it)
+Epoch [3] Train - Loss: 8.5775, Class Error: 25.07
+ [Fusion] Avg Alpha: 0.498 | Avg Beta: 0.497 (over 6 layers)
+Epoch: [4] Total time: 0:04:05 (0.2450 s / it)
+Epoch [4] Train - Loss: 8.3881, Class Error: 24.81
+ [Fusion] Avg Alpha: 0.497 | Avg Beta: 0.493 (over 6 layers)
+Test: Total time: 0:01:12 (0.2918 s / it)
+Accumulating evaluation results...
+DONE (t=1.22s).
+IoU metric: bbox
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.408
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=100 ] = 0.620
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=100 ] = 0.426
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.207
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = 0.450
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = 0.636
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=  1 ] = 0.330
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets= 10 ] = 0.525
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.565
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.309
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = 0.613
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = 0.815
+coco_evaluator.coco_eval['bbox'].stats: [0.40771629 0.62047815 0.42608527 0.20662841 0.45039894 0.63648124
+ 0.32951597 0.52454774 0.56486018 0.30881375 0.61278786 0.81474831]
+Epoch [4] Val - AP: 0.408, AP50: 0.620, AP75: 0.426, AR: 0.565, Loss: 7.7822
+ [Fusion] Avg Alpha: 0.497 | Avg Beta: 0.493 (over 6 layers)
+Validation score increased (-100000.000000 --> 0.407716).  Saving model ...
+Epoch: [5] Total time: 0:04:01 (0.2415 s / it)
+Epoch [5] Train - Loss: 8.4415, Class Error: 25.38
+ [Fusion] Avg Alpha: 0.499 | Avg Beta: 0.490 (over 6 layers)
+Epoch: [6] Total time: 0:04:07 (0.2474 s / it)
+Epoch [6] Train - Loss: 8.4484, Class Error: 25.33
+ [Fusion] Avg Alpha: 0.497 | Avg Beta: 0.487 (over 6 layers)
+Epoch: [7] Total time: 0:04:13 (0.2534 s / it)
+Epoch [7] Train - Loss: 8.3806, Class Error: 24.65
+ [Fusion] Avg Alpha: 0.495 | Avg Beta: 0.484 (over 6 layers)
+Epoch: [8] Total time: 0:04:01 (0.2416 s / it)
+Epoch [8] Train - Loss: 8.4414, Class Error: 24.84
+ [Fusion] Avg Alpha: 0.494 | Avg Beta: 0.483 (over 6 layers)
+Epoch: [9] Total time: 0:04:06 (0.2461 s / it)
+Epoch [9] Train - Loss: 8.3180, Class Error: 24.43
+ [Fusion] Avg Alpha: 0.494 | Avg Beta: 0.480 (over 6 layers)
+Test: Total time: 0:01:12 (0.2885 s / it)
+Accumulating evaluation results...
+DONE (t=1.22s).
+IoU metric: bbox
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.405
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=100 ] = 0.611
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=100 ] = 0.422
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.203
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = 0.454
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = 0.632
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=  1 ] = 0.330
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets= 10 ] = 0.524
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.561
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.298
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = 0.609
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = 0.821
+coco_evaluator.coco_eval['bbox'].stats: [0.40484747 0.61110123 0.42219341 0.20283471 0.45447696 0.63225529
+ 0.33007332 0.52376202 0.56075452 0.29752582 0.60944992 0.82139902]
+Epoch [9] Val - AP: 0.405, AP50: 0.611, AP75: 0.422, AR: 0.561, Loss: 7.7692
+ [Fusion] Avg Alpha: 0.494 | Avg Beta: 0.480 (over 6 layers)
+EarlyStopping counter: 1 out of 5
+Epoch: [10] Total time: 0:04:03 (0.2435 s / it)
+Epoch [10] Train - Loss: 8.3559, Class Error: 24.76
+ [Fusion] Avg Alpha: 0.492 | Avg Beta: 0.474 (over 6 layers)
+Epoch: [11] Total time: 0:04:08 (0.2488 s / it)
+Epoch [11] Train - Loss: 8.3530, Class Error: 24.62
+ [Fusion] Avg Alpha: 0.494 | Avg Beta: 0.471 (over 6 layers)
+Epoch: [12] Total time: 0:04:03 (0.2434 s / it)
+Epoch [12] Train - Loss: 8.3219, Class Error: 24.56
+ [Fusion] Avg Alpha: 0.496 | Avg Beta: 0.470 (over 6 layers)
+Epoch: [13] Total time: 0:04:08 (0.2485 s / it)
+Epoch [13] Train - Loss: 8.2575, Class Error: 25.02
+ [Fusion] Avg Alpha: 0.498 | Avg Beta: 0.464 (over 6 layers)
+Epoch: [14] Total time: 0:04:05 (0.2455 s / it)
+Epoch [14] Train - Loss: 8.3106, Class Error: 24.70
+ [Fusion] Avg Alpha: 0.496 | Avg Beta: 0.463 (over 6 layers)
+Test: Total time: 0:01:14 (0.2966 s / it)
+Accumulating evaluation results...
+DONE (t=1.10s).
+IoU metric: bbox
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.397
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=100 ] = 0.613
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=100 ] = 0.412
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.199
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = 0.440
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = 0.627
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=  1 ] = 0.323
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets= 10 ] = 0.517
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.552
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.288
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = 0.595
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = 0.815
+coco_evaluator.coco_eval['bbox'].stats: [0.39707677 0.61308174 0.41178582 0.19894032 0.44019285 0.62660724
+ 0.32289764 0.51668614 0.55166777 0.2883042  0.59521174 0.81470737]
+Epoch [14] Val - AP: 0.397, AP50: 0.613, AP75: 0.412, AR: 0.552, Loss: 7.8502
+ [Fusion] Avg Alpha: 0.496 | Avg Beta: 0.463 (over 6 layers)
+EarlyStopping counter: 2 out of 5
+Epoch: [15] Total time: 0:04:06 (0.2468 s / it)
+Epoch [15] Train - Loss: 8.3403, Class Error: 24.99
+ [Fusion] Avg Alpha: 0.497 | Avg Beta: 0.458 (over 6 layers)
+Epoch: [16] Total time: 0:04:06 (0.2462 s / it)
+Epoch [16] Train - Loss: 8.2210, Class Error: 24.52
+ [Fusion] Avg Alpha: 0.497 | Avg Beta: 0.456 (over 6 layers)
+Epoch: [17] Total time: 0:04:05 (0.2459 s / it)
+Epoch [17] Train - Loss: 8.1890, Class Error: 24.74
+ [Fusion] Avg Alpha: 0.498 | Avg Beta: 0.454 (over 6 layers)
+Epoch: [18] Total time: 0:04:03 (0.2435 s / it)
+Epoch [18] Train - Loss: 8.2910, Class Error: 25.00
+ [Fusion] Avg Alpha: 0.497 | Avg Beta: 0.448 (over 6 layers)
+Epoch: [19] Total time: 0:04:10 (0.2507 s / it)
+Epoch [19] Train - Loss: 8.2198, Class Error: 24.42
+ [Fusion] Avg Alpha: 0.496 | Avg Beta: 0.447 (over 6 layers)
+Test: Total time: 0:01:14 (0.2966 s / it)
+Accumulating evaluation results...
+DONE (t=1.06s).
+IoU metric: bbox
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.405
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=100 ] = 0.620
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=100 ] = 0.423
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.206
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = 0.451
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = 0.626
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=  1 ] = 0.326
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets= 10 ] = 0.520
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.556
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.305
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = 0.608
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = 0.809
+coco_evaluator.coco_eval['bbox'].stats: [0.40504041 0.61998899 0.42262791 0.20580151 0.4513117  0.62641755
+ 0.32570994 0.51969731 0.55644615 0.30491199 0.6076064  0.80946827]
+Epoch [19] Val - AP: 0.405, AP50: 0.620, AP75: 0.423, AR: 0.556, Loss: 7.7933
+ [Fusion] Avg Alpha: 0.496 | Avg Beta: 0.447 (over 6 layers)
+EarlyStopping counter: 3 out of 5
+Epoch: [20] Total time: 0:04:05 (0.2455 s / it)
+Epoch [20] Train - Loss: 8.2506, Class Error: 24.50
+ [Fusion] Avg Alpha: 0.497 | Avg Beta: 0.443 (over 6 layers)
+Epoch: [21] Total time: 0:04:10 (0.2509 s / it)
+Epoch [21] Train - Loss: 8.3006, Class Error: 24.82
+ [Fusion] Avg Alpha: 0.498 | Avg Beta: 0.439 (over 6 layers)
+Epoch: [22] Total time: 0:04:03 (0.2434 s / it)
+Epoch [22] Train - Loss: 8.2286, Class Error: 24.53
+ [Fusion] Avg Alpha: 0.499 | Avg Beta: 0.437 (over 6 layers)
+Epoch: [23] Total time: 0:04:20 (0.2602 s / it)
+Epoch [23] Train - Loss: 8.2138, Class Error: 24.23
+ [Fusion] Avg Alpha: 0.495 | Avg Beta: 0.432 (over 6 layers)
+Epoch: [24] Total time: 0:04:11 (0.2518 s / it)
+Epoch [24] Train - Loss: 8.2390, Class Error: 24.45
+ [Fusion] Avg Alpha: 0.498 | Avg Beta: 0.427 (over 6 layers)
+Test: Total time: 0:01:13 (0.2954 s / it)
+Accumulating evaluation results...
+DONE (t=1.18s).
+IoU metric: bbox
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.406
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=100 ] = 0.617
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=100 ] = 0.426
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.203
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = 0.452
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = 0.626
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=  1 ] = 0.327
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets= 10 ] = 0.523
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.561
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.300
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = 0.612
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = 0.816
+coco_evaluator.coco_eval['bbox'].stats: [0.40600858 0.61739769 0.42641687 0.20296507 0.45214861 0.62617286
+ 0.32663738 0.52304085 0.5614338  0.2997229  0.61189111 0.8163749 ]
+Epoch [24] Val - AP: 0.406, AP50: 0.617, AP75: 0.426, AR: 0.561, Loss: 7.7266
+ [Fusion] Avg Alpha: 0.498 | Avg Beta: 0.427 (over 6 layers)
+EarlyStopping counter: 4 out of 5
+Epoch: [25] Total time: 0:04:15 (0.2550 s / it)
+Epoch [25] Train - Loss: 8.2388, Class Error: 24.32
+ [Fusion] Avg Alpha: 0.500 | Avg Beta: 0.424 (over 6 layers)
+Epoch: [26] Total time: 0:04:19 (0.2592 s / it)
+Epoch [26] Train - Loss: 8.2465, Class Error: 24.56
+ [Fusion] Avg Alpha: 0.497 | Avg Beta: 0.425 (over 6 layers)
+Epoch: [27] Total time: 0:04:31 (0.2714 s / it)
+Epoch [27] Train - Loss: 8.2586, Class Error: 24.55
+ [Fusion] Avg Alpha: 0.500 | Avg Beta: 0.423 (over 6 layers)
+Epoch: [28] Total time: 0:04:16 (0.2563 s / it)
+Epoch [28] Train - Loss: 8.1931, Class Error: 24.38
+ [Fusion] Avg Alpha: 0.498 | Avg Beta: 0.423 (over 6 layers)
+Epoch: [29] Total time: 0:04:27 (0.2676 s / it)
+Epoch [29] Train - Loss: 8.2153, Class Error: 24.35
+ [Fusion] Avg Alpha: 0.497 | Avg Beta: 0.422 (over 6 layers)
+Test: Total time: 0:01:17 (0.3092 s / it)
+Accumulating evaluation results...
+DONE (t=1.33s).
+IoU metric: bbox
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.406
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=100 ] = 0.614
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=100 ] = 0.429
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.213
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = 0.454
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = 0.621
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=  1 ] = 0.329
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets= 10 ] = 0.525
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.563
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.305
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = 0.617
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = 0.811
+coco_evaluator.coco_eval['bbox'].stats: [0.40555829 0.61433741 0.42872166 0.21277884 0.45395224 0.62104848
+ 0.32946491 0.52479293 0.56290208 0.30549855 0.61662977 0.81102615]
+Epoch [29] Val - AP: 0.406, AP50: 0.614, AP75: 0.429, AR: 0.563, Loss: 7.7642
+ [Fusion] Avg Alpha: 0.497 | Avg Beta: 0.422 (over 6 layers)
+EarlyStopping counter: 5 out of 5
+Early stopping triggered!
+Training time 2:13:09

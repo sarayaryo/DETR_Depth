@@ -209,16 +209,17 @@ class RGBD_MultiHeadAttention(nn.Module):
         self.num_heads = num_heads
         self.head_dim = embed_dim // num_heads
         assert self.head_dim * num_heads == self.embed_dim
+        
 
         # Fusion parameters
         if args.use_learnable_param:
             self.alpha = nn.Parameter(torch.tensor(0.0))
             self.beta = nn.Parameter(torch.tensor(0.0))
         else:
-            self.alpha = 0.5
-            self.beta = 0.0
-        if args.use_ar_fusion:
-            self.use_ar_fusion = True
+            self.alpha = 0.25
+            self.beta = 0.25
+            
+        self.use_ar_fusion = getattr(args, 'use_ar_fusion', False)
     
     def forward(
         self,
