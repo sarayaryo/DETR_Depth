@@ -1,2 +1,0 @@
-{"train_lr": null, "train_class_error": 31.110600891113283, "train_loss": 10.193653216362, "epoch": 0, "n_parameters": 49717344}
-{"train_lr": null, "train_class_error": 28.09939867401123, "train_loss": 9.49665264225006, "epoch": 1, "n_parameters": 49717344}

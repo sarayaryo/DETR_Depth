@@ -42,3 +42,15 @@ python DETR/detr/main.py --coco_path "/workspace/coco/coco2017" --depth_path "/w
 
 ## AR-fusion
 python DETR/detr/main.py --coco_path "/workspace/coco/coco2017" --depth_path "/workspace/coco/coco2017_depth" --use_depth --resume "/workspace/DETR/weights/detr-r50-e632da11.pth" --output_dir DETR/detr/outputs/[PE3]ARfusion_alphalearn_betalearn_*10_ep50_bs8-4*2_dec-frozen --epochs 50 --lr 1e-4 --lr_backbone 1e-5 --batch_size 4 --num_workers 8  --val_split --use_sharefusion --use_ar_fusion --device cuda --use_learnable_param
+
+# ####################################
+# 推論時
+# ####################################
+
+
+# ###### ローカル環境
+# バッチサイズ4*2で推論（学習時の実効バッチサイズと同じ）
+python test.py --weights "outputs\[PE2]latefusion_alpha0.0_beta0.0_ep50_bs8-4x2_dec-frozen\best_model.pth" --coco_path "S:/coco/coco2017" --depth_path "S:/coco/coco2017_depth" --batch_size 2 --num_workers 0 --use_depth --use_sharefusion --output_dir test_results --val_split --lr_backbone 1e-5 --exp_name latefusion_alpha0.0_beta0.0
+
+--use_sharefusion
+--use_ar_fusion --use_learnable_param
