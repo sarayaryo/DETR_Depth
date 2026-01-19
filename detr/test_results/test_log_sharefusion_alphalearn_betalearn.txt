@@ -1,0 +1,49 @@
+C:\Users\ryosu\AppData\Local\Programs\Python\Python311\Lib\site-packages\torchvision\models\_utils.py:208: UserWarning: The parameter 'pretrained' is deprecated since 0.13 and may be removed in the future, please use 'weights' instead.
+  warnings.warn(
+C:\Users\ryosu\AppData\Local\Programs\Python\Python311\Lib\site-packages\torchvision\models\_utils.py:223: UserWarning: Arguments other than a weight enum or `None` for 'weights' are deprecated since 0.13 and may be removed in the future. The current behavior is equivalent to passing `weights=ResNet50_Weights.IMAGENET1K_V1`. You can also use `weights=ResNet50_Weights.DEFAULT` to get the most up-to-date weights.
+  warnings.warn(msg)
+>>> Building RGB-D Transformer with ShareFusion...
+
+Learnable params (alpha / beta):
+  transformer.encoder.layers.0.self_attn.alpha: -0.084337
+  transformer.encoder.layers.0.self_attn.beta: 0.051696
+  transformer.encoder.layers.1.self_attn.alpha: 0.131870
+  transformer.encoder.layers.1.self_attn.beta: 0.103247
+  transformer.encoder.layers.2.self_attn.alpha: 0.152493
+  transformer.encoder.layers.2.self_attn.beta: 0.149589
+  transformer.encoder.layers.3.self_attn.alpha: -0.125324
+  transformer.encoder.layers.3.self_attn.beta: 0.157544
+  transformer.encoder.layers.4.self_attn.alpha: 0.066684
+  transformer.encoder.layers.4.self_attn.beta: 0.093496
+  transformer.encoder.layers.5.self_attn.alpha: 0.092227
+  transformer.encoder.layers.5.self_attn.beta: 0.005992
+Using split validation dataset for val
+loading annotations into memory...
+Done (t=0.09s)
+creating index...
+index created!
+Using split validation dataset for val
+loading annotations into memory...
+Done (t=0.05s)
+creating index...
+index created!
+Test: Total time: 0:02:43 (0.3267 s / it)
+Accumulating evaluation results...
+DONE (t=0.60s).
+IoU metric: bbox
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.414
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=100 ] = 0.622
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=100 ] = 0.434
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.219
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = 0.462
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = 0.636
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=  1 ] = 0.332
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets= 10 ] = 0.527
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.563
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.317
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = 0.613
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = 0.814
+coco_evaluator.coco_eval['bbox'].stats: [0.41414039 0.62232126 0.43402717 0.2192564  0.46154252 0.63609521
+ 0.33206099 0.52661513 0.56349349 0.31675713 0.61313425 0.81359162]
+Epoch [None] Val - AP: 0.414, AP50: 0.622, AP75: 0.434, AR: 0.563, Loss: 7.2395
+AP: 0.4141 | AP50: 0.6223 | AP75: 0.4340 | APS: 0.2193 | APM: 0.4615 | APL: 0.6361

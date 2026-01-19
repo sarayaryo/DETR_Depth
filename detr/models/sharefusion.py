@@ -216,8 +216,8 @@ class RGBD_MultiHeadAttention(nn.Module):
             self.alpha = nn.Parameter(torch.tensor(0.0))
             self.beta = nn.Parameter(torch.tensor(0.0))
         else:
-            self.alpha = 0.25
-            self.beta = 0.25
+            self.alpha = 0.0
+            self.beta = 0.5
             
         self.use_ar_fusion = getattr(args, 'use_ar_fusion', False)
     

@@ -88,7 +88,7 @@ def get_args_parser():
     parser.add_argument('--masks', action='store_true')
     parser.add_argument('--aux_loss', action='store_false')
     parser.add_argument('--frozen_weights', type=str, default=None)
-    parser.add_argument('exp_name', type=str, nargs='?', default='test')
+    parser.add_argument('--exp_name', type=str, nargs='?', default='test')
     
     return parser
 
@@ -136,6 +136,25 @@ def main(args):
         model.load_state_dict(checkpoint, strict=False)
     
     model.eval()
+
+    # If requested, print learnable parameters named 'alpha' or 'beta' to the log
+    if hasattr(args, 'use_learnable_param') and args.use_learnable_param:
+        print("\nLearnable params (alpha / beta):")
+        found = False
+        for name, param in model.named_parameters():
+            lname = name.lower()
+            if 'alpha' in lname or 'beta' in lname:
+                found = True
+                v = param.detach().cpu().numpy()
+                try:
+                    if v.size == 1:
+                        print(f"  {name}: {float(v):.6f}")
+                    else:
+                        print(f"  {name}: shape={v.shape} mean={float(v.mean()):.6f}")
+                except Exception:
+                    print(f"  {name}: <unable to display>")
+        if not found:
+            print("  (no parameters named 'alpha' or 'beta' found)")
     
     # Building test dataset (progress output suppressed)
     # main.pyと同じように、valセットを構築してからtestとして使用
