@@ -13,6 +13,7 @@ datasets/data/
 experiment-*
 *.tmp
 *.pkl
+*.pth
 **/.mypy_cache/*
 .mypy_cache/*
 not_tracked_dir/
